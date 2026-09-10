@@ -1,13 +1,13 @@
 # NUTRAMOVE — Contexto atual para próximos prompts
 
-Atualizado em 10 de setembro de 2026, após o Dia 5.
+Atualizado em 10 de setembro de 2026, após o Dia 6.
 
 ## Estado real
 
 Implementados: fundação, autenticação por sessão opaca, MASTER + gestão de
 profissionais, Student + onboarding + isolamento e dashboards por perfil.
-Não existem Diet, Workout, IA, transferência de alunos ou notificações.
-O trabalho encerrou no Dia 5; próximas funcionalidades exigem autorização.
+Dietas com versões e publicação foram implementadas no Dia 6. Não existem Workout, IA, transferência de alunos ou notificações.
+O trabalho encerrou no Dia 6; próximas funcionalidades exigem autorização.
 
 Repositório informado: BielEscobar/NutraMove. Branch local: develop.
 main é reservada para produção. As alterações locais dos Dias 3, 4 e 5 estão sem
@@ -136,7 +136,7 @@ useMasterResource permanece como alias compatível.
 - 20260910_02: professionals.
 - 20260910_03: students, FKs, UNIQUE, índice e constraints.
 
-Dia 5 não alterou modelos nem migrations. Banco local na revisão 20260910_03 (head).
+Dia 5 não alterou modelos nem migrations. No Dia 5, o banco estava na revisão 20260910_03; o Dia 6 adiciona 20260910_04.
 Alembic check sem divergências; contêineres saudáveis.
 As fixtures de testes verificam upgrade/downgrade/check em schemas isolados.
 
@@ -218,3 +218,19 @@ de IA foi criada nem autorizada automaticamente.
 - [authentication.md](authentication.md): sessão e limites.
 - [architecture.md](architecture.md): organização.
 - [validation.md](validation.md): histórico de verificações.
+
+## Atualização do Dia 6 — Diet
+
+Consulte [diets.md](diets.md) para o contexto completo e inventário de arquivos.
+Diet → DietVersion → Meal → Food → FoodSubstitution, com snapshots e revisão otimista.
+Professional cria/edita/duplica/publica apenas na própria carteira; MASTER somente lê.
+Student ACTIVE consulta somente a dieta aprovada atual em /student/diet. Publicação arquiva
+a anterior do aluno atomicamente. DRAFT/MANUAL é o padrão; PENDING_REVIEW/AI_GENERATED
+preparam um contrato futuro sem integração real. Não há Workout ou autorização para Dia 7.
+Migration 04 preserva as anteriores. Resultado atual: 217 testes, Ruff, mypy (61 arquivos),
+pip check, Biome (65 arquivos), tipos e build aprovados. Chrome validou o fluxo completo
+e quatro larguras sem overflow. Não há suíte E2E persistente. Aviso Starlette/AnyIO permanece.
+O comando local create_demo_users e alterações anteriores no README foram preservados.
+
+Banco local atualizado para 20260910_04 (head), Alembic check sem divergências e
+contêineres saudáveis. Configuração Compose e imagem Docker validadas.

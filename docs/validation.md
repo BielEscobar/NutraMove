@@ -129,3 +129,24 @@ inspecionadas. Nenhuma exceção JavaScript não tratada. Não foi instalada su�
 Aviso conhecido Starlette/AnyIO permanece visível; avisos LF/CRLF do Git também.
 O teste de erro usa bloqueio temporário de rede no navegador e recupera acesso
 real antes do retry. Não há mock permanente. Detalhes em dashboards.md.
+
+## Dia 6 — Dietas (10 de setembro de 2026)
+
+- pytest: 217 passaram, nenhum pulado; 32 testes específicos de dieta.
+- Ruff check e format --check: aprovados; mypy: 61 arquivos sem erros; pip check aprovado.
+- Biome: 65 arquivos aprovado; TypeScript e build Next.js aprovados.
+- Docker build aprovado. Migration 04 validada com upgrade/downgrade/check nas fixtures.
+- Chrome/API real: criação, publicação, duplicação, edição, republicação, histórico,
+  leitura Student e MASTER passaram. Editor e leitor em 1366/1024/768/375 sem overflow
+  horizontal nem exceções JS não tratadas; capturas representativas inspecionadas.
+- Corrigidos conflito de nome do tipo datetime.time e ajustes de lint durante implementação.
+  Exceção de chave por posição no leitor está justificada e limitada a snapshots de leitura.
+- Permanece apenas o aviso de depreciação interno Starlette/AnyIO conhecido.
+
+Dados de navegador sintéticos foram isolados em schema temporário. Não foi instalada
+suíte E2E nem adicionada dependência. Consulte diets.md para limites e arquivos.
+
+Validação local final: Compose config aprovado; Docker backend e PostgreSQL saudáveis;
+Alembic current = 20260910_04 (head), check sem divergências. A verificação auxiliar
+teve um erro de tipo ao passar PostgresDsn diretamente para create_engine; corrigida
+para str apenas no comando de inspeção, sem alteração no código da aplicação.

@@ -1,7 +1,7 @@
 # NUTRAMOVE
 
 Fundação, autenticação, gestão de profissionais e módulo Student implementados.
-Onboarding e isolamento entre profissionais incluídos. Diet, Workout e IA não implementados.
+Onboarding e isolamento entre profissionais incluídos. Dietas com versionamento e publicação implementadas. Workout e IA não implementados.
 
 - Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui e Lucide.
 - Backend: Python 3.13, FastAPI, SQLAlchemy 2.0, Pydantic e Alembic.
@@ -166,7 +166,7 @@ fica no detalhe desse profissional na área MASTER. Cadastro sem código fica se
 vínculo e é administrado apenas por MASTER. Login direciona PROFESSIONAL para
 /professional e STUDENT para /student.
 
-A migration atual é 20260910_03. Veja [Student](docs/students.md),
+A migration atual é 20260910_04. Veja [Student](docs/students.md),
 [inventário de arquivos](docs/student-files.md) e [contexto atualizado](docs/relatorio-contexto-proximos-prompts.md).
 Cadastro público e login ainda precisam de proteção contra abuso antes de exposição pública.
 
@@ -177,3 +177,24 @@ Após login e consulta a /auth/me: MASTER abre /master, PROFESSIONAL abre
 /professional e STUDENT abre /student. O perfil completo do aluno fica em
 /student/profile. Veja [dashboards e navegação](docs/dashboards.md) para métricas,
 endpoints, arquivos e validação responsiva. Não houve nova migration nesta etapa.
+
+## Contas locais de demonstracao
+
+Para criar logins MASTER e PROFESSIONAL somente em ENVIRONMENT=development,
+execute dentro de backend/:
+
+```powershell
+.venv/Scripts/python.exe -m app.cli.create_demo_users
+```
+
+O comando cria master.demo@example.com e professional.demo@example.com usando
+os servicos existentes. Gera senhas aleatorias e as mostra uma unica vez no terminal.
+Guarde-as fora do Git. Repetir o comando preserva contas e senhas existentes.
+Nao cria alunos nem dados ficticios de acompanhamento e nao funciona em production/test.
+As contas sao locais ao banco configurado; nao sao contas padrao de producao.
+
+## Dietas e versões — Dia 6
+
+Professional acessa Meus alunos → detalhe → Dieta e versões. Student acessa Minha dieta.
+MASTER possui leitura. Consulte [dietas](docs/diets.md) para modelos, endpoints, fluxo e validação.
+Aplique alembic upgrade head antes de utilizar o módulo.

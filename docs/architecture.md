@@ -74,14 +74,14 @@ escopo também nas mutações; acesso cruzado retorna 404.
 
 A relação User–Student é 1:1; Professional–Student é 1:N, com vínculo opcional.
 Os serviços controlam criação atômica e transições de status, sem repositório genérico.
-A migration atual é 20260910_03; revisões anteriores foram preservadas.
+A migration atual é 20260910_04; revisões anteriores foram preservadas.
 
 Frontend usa componentes de onboarding e gestão em components/students e um hook
 compartilhado useApiResource. Os contratos de listagem e detalhe são separados.
 SafeErrorMiddleware e logs sem valores pessoais protegem os dados do cadastro.
 
 Consulte [profissionais](professionals.md), [Student](students.md) e
-[arquivos do Dia 4](student-files.md). Diet, Workout e IA não foram implementados.
+[arquivos do Dia 4](student-files.md). Workout e IA não foram implementados. Dietas estão descritas abaixo.
 
 
 ## Dashboards — Dia 5
@@ -94,3 +94,11 @@ AppShell compartilha os layouts e a navegação por perfil. MetricCard, EmptySta
 ManagementDashboard evitam duplicação das telas; o cliente HTTP e o hook existentes
 foram reutilizados. /student/profile preserva o detalhe do cadastro anterior.
 Veja [dashboards.md](dashboards.md) para as decisões e o inventário de arquivos.
+
+## Dietas — Dia 6
+
+Student e Professional possuem Diet; Diet possui DietVersion; cada versão possui Meal,
+Food e FoodSubstitution em árvore relacional. Nome e conteúdo são snapshots por versão.
+Repositories aplicam ownership; services controlam bloqueios, transações e publicação.
+O frontend reutiliza AppShell e useApiResource. Veja [dietas](diets.md) para contratos,
+revisão concorrente, arquivos e limites. Migration 20260910_04 adiciona cinco tabelas.

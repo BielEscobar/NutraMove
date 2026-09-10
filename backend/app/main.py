@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
 from app.api.dashboards import router as dashboards_router
+from app.api.diets import master_router as master_diets_router
+from app.api.diets import professional_router as professional_diets_router
+from app.api.diets import student_router as student_diets_router
 from app.api.health import router as health_router
 from app.api.professionals import router as professionals_router
 from app.api.students import master_router as master_students_router
@@ -36,4 +39,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(master_students_router)
     app.include_router(professional_students_router)
     app.include_router(dashboards_router)
+    app.include_router(professional_diets_router)
+    app.include_router(master_diets_router)
+    app.include_router(student_diets_router)
     return app
