@@ -1,85 +1,69 @@
 # NUTRAMOVE
 
-Fundação do projeto, sem funcionalidades de negócio ou autenticação.
+Fundação e autenticação implementadas. Gestão de profissionais, alunos e IA ainda
+não fazem parte desta entrega.
 
-- **Frontend:** Next.js, React, TypeScript, Tailwind CSS, shadcn/ui e Lucide.
-- **Backend:** Python 3.13, FastAPI, SQLAlchemy 2.0, Pydantic e Alembic.
-- **Banco:** PostgreSQL 17.
-- **Infraestrutura local:** Docker e Docker Compose.
-- **Branches:** `develop` para desenvolvimento e `main` para produção.
+- Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui e Lucide.
+- Backend: Python 3.13, FastAPI, SQLAlchemy 2.0, Pydantic e Alembic.
+- Banco: PostgreSQL 17.
+- Infraestrutura local: Docker e Docker Compose.
+- Branches: develop para desenvolvimento; main para produção.
 
-## Estrutura
+## Organização
 
-```text
-frontend/                Aplicação Next.js independente
-backend/
-  app/
-    main.py              Fábrica da aplicação FastAPI
-    api/                 Endpoints HTTP
-    core/                Configuração e tratamento de erros
-    db/                  Base e sessões SQLAlchemy
-    models/              Futuros modelos do banco
-    schemas/             Contratos Pydantic
-    services/            Futuras regras de negócio
-    repositories/        Futuras consultas ao banco
-    utils/               Utilitários compartilhados
-  tests/                 Testes da fundação
-  alembic/               Ambiente e futuras migrations
-infra/                   Compose e configuração dos contêineres
-docs/                    Documentação e decisões
-```
+- frontend/: interface e cliente HTTP.
+- backend/: API, autenticação, modelos, migrations e testes.
+- infra/: Compose e configuração dos contêineres.
+- docs/: [arquitetura](docs/architecture.md), [autenticação](docs/authentication.md)
+  e [validações](docs/validation.md).
 
-Detalhes em [docs/architecture.md](docs/architecture.md).
+## Preparar o ambiente
 
-## Pré-requisitos
+Pré-requisitos: Node.js 24, npm, Python 3.13 e Docker com Compose.
+Os comandos a seguir usam PowerShell, partindo da raiz do repositório.
 
-Node.js 24, npm, Python 3.13 e Docker com Compose. Os comandos abaixo são para
-PowerShell, a partir da raiz do repositório. Use `npm.cmd` e `npx.cmd` se a política
-do PowerShell bloquear os scripts `.ps1`; não é necessário alterar essa política.
-No Linux/macOS, use `npm`, `npx` e `.venv/bin/python`.
-
-## 1. Configurar o ambiente local
-
-Copie os exemplos somente se os arquivos de destino ainda não existirem:
+Se ainda não existirem, copie os exemplos:
 
 ```powershell
-Copy-Item infra/.env.example infra/.env
-Copy-Item backend/.env.example backend/.env
-Copy-Item frontend/.env.example frontend/.env.local
+if (!(Test-Path infra/.env)) { Copy-Item infra/.env.example infra/.env }
+if (!(Test-Path backend/.env)) { Copy-Item backend/.env.example backend/.env }
+if (!(Test-Path frontend/.env.local)) { Copy-Item frontend/.env.example frontend/.env.local }
 ```
 
-Defina uma senha local em `infra/.env` (`POSTGRES_PASSWORD`) e use a mesma senha
-na `DATABASE_URL` de `backend/.env`. Prefira uma senha aleatória com caracteres
-seguros para URL, como hexadecimal. Não use os placeholders dos exemplos.
-No Compose, o hostname do banco é `db`; no backend executado localmente, é
-`localhost`. O Compose monta a URL automaticamente a partir de `infra/.env`.
+Defina POSTGRES_PASSWORD em infra/.env e use a mesma senha em DATABASE_URL de
+backend/.env. Prefira senha aleatória com caracteres seguros para URL.
+Não use placeholders. Os arquivos locais estão ignorados pelo Git.
+Nunca inclua secrets em variáveis NEXT_PUBLIC_*: elas são públicas.
 
-Os arquivos `.env` estão ignorados pelo Git. Nunca adicione secrets aos exemplos.
-O prefixo `NEXT_PUBLIC_` torna uma variável pública no frontend.
+O hostname do banco é db no Compose e localhost para Python executado localmente.
+Use http://localhost:3000 no navegador, conforme CORS_ORIGINS; 127.0.0.1 é outra origem.
 
-## 2. Iniciar backend e PostgreSQL
-
-Com o Docker em execução:
+## Backend e PostgreSQL
 
 ```powershell
 docker compose --env-file infra/.env -f infra/compose.yaml up --build -d --wait
+docker compose --env-file infra/.env -f infra/compose.yaml exec -T backend python -m alembic upgrade head
+docker compose --env-file infra/.env -f infra/compose.yaml exec -T backend python -m alembic check
 ```
 
 - API: http://localhost:8000
-- Health: http://localhost:8000/health → `{"status":"ok"}`
-- Documentação OpenAPI: http://localhost:8000/docs
+- Health: http://localhost:8000/health
+- OpenAPI: http://localhost:8000/docs
 
-O Compose inicia apenas backend e banco. O frontend roda localmente nesta etapa.
-O endpoint de health verifica a API, não a disponibilidade do banco.
+Aplique migrations antes de usar o login. Health verifica a API, não o banco.
+O contêiner executa como appuser e as portas são publicadas apenas em localhost.
 
-Para consultar logs e parar os contêineres preservando os dados:
+## Criar o primeiro MASTER
 
 ```powershell
-docker compose --env-file infra/.env -f infra/compose.yaml logs backend
-docker compose --env-file infra/.env -f infra/compose.yaml down
+docker compose --env-file infra/.env -f infra/compose.yaml exec backend python -m app.cli.create_master
 ```
 
-## 3. Iniciar o frontend
+Informe nome, e-mail e senha com confirmação. A senha deve ter 12 a 128 caracteres
+e não é exibida no terminal. Não existe usuário ou senha padrão.
+A conta é criada apenas por esse comando administrativo, sem cadastro público.
+
+## Frontend
 
 Em outro terminal:
 
@@ -89,44 +73,52 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-Acesse http://localhost:3000. A página inicial contém apenas a identificação do
-NUTRAMOVE. Não há integração de negócio com a API.
+Acesse http://localhost:3000/login. Após entrar, /account exibe sua conta e permite
+sair. Sessões usam cookie HttpOnly, sem tokens no localStorage.
+A fonte Inter é servida localmente com licença incluída.
 
-## Backend local e ferramentas de desenvolvimento
+No Linux/macOS, use npm em vez de npm.cmd.
+No Windows, npm.cmd evita alterar a política de execução do PowerShell.
 
-Para executar testes ou desenvolver fora do contêiner:
+## Backend local
+
+Dentro de backend/:
 
 ```powershell
-cd backend
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements-dev.txt
+.venv/Scripts/python.exe -m alembic upgrade head
 .venv/Scripts/python.exe -m uvicorn app.main:create_app --factory --reload
 ```
 
-Não execute o backend local simultaneamente ao contêiner na mesma porta.
-Se desejar apenas PostgreSQL no Docker, pare o backend do Compose e use:
+Não execute o backend local e o contêiner na mesma porta simultaneamente.
+Para manter somente o banco no Docker, execute na raiz:
 
 ```powershell
-docker compose --env-file infra/.env -f infra/compose.yaml up -d db
+docker compose --env-file infra/.env -f infra/compose.yaml stop backend
+docker compose --env-file infra/.env -f infra/compose.yaml up -d db --wait
 ```
 
-Esse último comando deve ser executado na raiz do repositório.
+No Linux/macOS, o Python do ambiente virtual fica em .venv/bin/python.
 
 ## Verificações
 
-Backend, dentro de `backend/`:
+Backend, dentro de backend/:
 
 ```powershell
-.venv/Scripts/python.exe -m pytest -q
+.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
 .venv/Scripts/python.exe -m ruff check .
 .venv/Scripts/python.exe -m ruff format --check .
 .venv/Scripts/python.exe -m mypy
 .venv/Scripts/python.exe -m pip check
 ```
 
-Os testes não dependem de PostgreSQL nem de um `.env` local.
+A suíte completa exige PostgreSQL e backend/.env configurados. Os testes de
+autenticação usam migrations reais em schema temporário, removido ao final; não
+alteram tabelas existentes. Os testes da fundação continuam sem dependência de banco.
+A opção no:cacheprovider contorna uma permissão local do cache, sem pular testes.
 
-Frontend, dentro de `frontend/`:
+Frontend, dentro de frontend/:
 
 ```powershell
 npm.cmd run lint
@@ -134,37 +126,28 @@ npm.cmd run typecheck
 npm.cmd run build
 ```
 
-Não foi adicionado um framework de testes ao frontend estático nesta etapa.
-O lint, o typecheck e o build validam sua fundação.
-
 Compose, na raiz:
 
 ```powershell
 docker compose --env-file infra/.env -f infra/compose.yaml config --quiet
-docker compose --env-file infra/.env -f infra/compose.yaml build backend
 ```
 
-Evite publicar a saída de `docker compose config` sem `--quiet`, pois ela expõe
-valores resolvidos das variáveis de ambiente.
+Use --quiet para não exibir variáveis resolvidas que possam conter secrets.
 
-## Migrations
+## Configuração e limites
 
-Dentro de `backend/`, com PostgreSQL disponível e `backend/.env` configurado:
+SESSION_SECONDS controla a duração absoluta da sessão (padrão: 3600).
+COOKIE_SECURE deve ser true em produção, com CORS_ORIGINS usando HTTPS.
+O Compose desta etapa é exclusivamente para desenvolvimento local.
+Frontend e API devem ser implantados no mesmo site para a política SameSite=Lax.
+Requisições POST de autenticação exigem Origin confiável.
+
+Antes de expor publicamente, configure limitação de tentativas de login e a
+infraestrutura de produção. Recuperação de senha e MFA não estão implementados.
+Veja [autenticação](docs/authentication.md) para decisões e débitos técnicos.
+
+Para parar os serviços preservando o volume de dados:
 
 ```powershell
-.venv/Scripts/python.exe -m alembic current
-.venv/Scripts/python.exe -m alembic upgrade head
-.venv/Scripts/python.exe -m alembic check
+docker compose --env-file infra/.env -f infra/compose.yaml down
 ```
-
-Não existem tabelas de negócio nem revisões nesta etapa. Alembic pode criar sua
-tabela interna de controle. Não usamos `Base.metadata.create_all()`.
-Quando modelos forem implementados, deverão ser importados em
-`app/models/__init__.py`; as revisões geradas deverão ser revisadas antes de aplicar.
-
-## Limites desta etapa
-
-O Compose é local e não configura deploy, TLS ou backups na Hostinger.
-CORS permite inicialmente `http://localhost:3000`, método GET e Content-Type,
-sem credenciais. CORS não substitui autorização no backend.
-As demais pastas estão preparadas, sem entidades, CRUDs ou regras de negócio.

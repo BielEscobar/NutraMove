@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
   --font-mono: Consolas, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -126,5 +126,40 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@theme inline {
+  --color-brand-deep: #124c3a;
+  --color-brand-mint: #a8d8bd;
+  --color-brand-petrol: #176b78;
+  --color-brand-energy: #d5b85a;
+}
+
+:root {
+  --background: #f6f8f6;
+  --foreground: #1d2924;
+  --card: #ffffff;
+  --card-foreground: #1d2924;
+  --popover: #ffffff;
+  --popover-foreground: #1d2924;
+  --primary: #167d5a;
+  --primary-foreground: #ffffff;
+  --secondary: #e1e8e3;
+  --secondary-foreground: #124c3a;
+  --muted: #f6f8f6;
+  --muted-foreground: #697770;
+  --accent: #a8d8bd;
+  --accent-foreground: #124c3a;
+  --destructive: #c94b4b;
+  --border: #e1e8e3;
+  --input: #e1e8e3;
+  --ring: #167d5a;
+  --radius: 0.5rem;
+}
+
+@layer components {
+  .auth-input {
+    @apply block h-11 w-full rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60;
   }
 }

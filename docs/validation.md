@@ -43,3 +43,33 @@ Verificações executadas em 8 de setembro de 2026, no Windows 11, com Node.js
   fundação. O frontend possui package-lock.json.
 - Não há testes de interface ou de negócio: o frontend é apenas uma página estática.
   Os testes Python cobrem health, CORS, configuração e respostas de erro.
+
+## Autenticação — 10 de setembro de 2026
+
+- 40 testes passaram usando PostgreSQL em schema isolado; nenhum teste foi pulado.
+- Upgrade, downgrade e novo upgrade da migration 20260910_01 foram verificados
+  no schema temporário. Alembic check não identificou diferenças.
+- A migration foi aplicada no banco local; a API atualizada e PostgreSQL estão saudáveis.
+- HTTP real no contêiner: /health retorna 200; /auth/me sem sessão retorna 401.
+- Ruff lint e formatação: aprovados.
+- mypy strict: nenhum erro em 35 arquivos.
+- pip check: nenhuma incompatibilidade.
+- Biome: lint/formatação aprovados em 14 arquivos.
+- TypeScript: aprovado.
+- Build Next.js de produção: aprovado, com /login e /account.
+- Build Docker do backend: aprovado.
+- Fonte Inter incluída localmente com licença OFL; nenhuma dependência npm foi adicionada.
+- Dependências Python adicionadas: pwdlib[argon2] 0.3.1 e email-validator 2.3.0.
+
+O aviso interno Starlette/AnyIO permanece visível. Houve bloqueios de acesso à rede
+no sandbox, resolvidos pela execução autorizada. O cache do pytest apresentou
+permissão negada; a verificação final usou -p no:cacheprovider, sem desabilitar testes.
+O Biome apontou uma dependência desnecessária no effect de tentar novamente;
+o fluxo foi simplificado e a verificação passou.
+
+Não foi executada automação de navegador. Não há usuário padrão ou seed de
+credenciais. A criação do primeiro MASTER é interativa.
+Nenhum commit foi criado.
+
+Veja [decisões de autenticação](authentication.md) e
+[inventário dos arquivos](authentication-files.md).
