@@ -110,6 +110,10 @@ export default function StudentPage() {
           Ver meu perfil
         </Link>
       </section>
+      <Link className="master-primary mt-5" href="/student/diet">
+        <Leaf className="size-4" aria-hidden="true" />
+        Minha dieta
+      </Link>
       {data.status === "ACTIVE" && (
         <section
           aria-label="Áreas em preparação"
@@ -121,7 +125,7 @@ export default function StudentPage() {
               text: "Ainda não disponível.",
               icon: Dumbbell,
             },
-            { title: "Minha dieta", text: "Ainda não disponível.", icon: Leaf },
+
             {
               title: "Minha evolução",
               text: "Em preparação.",

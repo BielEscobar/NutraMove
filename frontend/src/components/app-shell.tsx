@@ -28,6 +28,7 @@ const navigation = {
   STUDENT: [
     { href: "/student", label: "Início", icon: LayoutDashboard },
     { href: "/student/profile", label: "Meu perfil", icon: UserRound },
+    { href: "/student/diet", label: "Minha dieta", icon: Leaf },
   ],
 };
 const labels = {
