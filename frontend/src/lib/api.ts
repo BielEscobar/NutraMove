@@ -35,13 +35,22 @@ export async function apiRequest<T>(
     throw new ApiError(0, "Não foi possível conectar à API. Tente novamente.");
   }
   if (!response.ok) {
-    const message =
-      response.status === 401
-        ? "E-mail ou senha inválidos, ou sessão expirada."
-        : response.status === 403
-          ? "Acesso não permitido. Verifique a configuração de origem da aplicação."
-          : "Não foi possível concluir a solicitação. Tente novamente.";
-    throw new ApiError(response.status, message);
+    const messages: Record<number, string> = {
+      401: "Sessão expirada ou credenciais inválidas. Entre novamente.",
+      403: "Você não tem permissão para realizar esta ação.",
+      404: "Registro não encontrado.",
+      409:
+        path.startsWith("/master/professionals") ||
+        path === "/students/register"
+          ? "E-mail já cadastrado. Informe outro e-mail."
+          : "A situação do cadastro não permite esta ação. Atualize os dados.",
+      422: "Revise os campos informados e tente novamente.",
+    };
+    throw new ApiError(
+      response.status,
+      messages[response.status] ??
+        "Não foi possível concluir a solicitação. Tente novamente.",
+    );
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;

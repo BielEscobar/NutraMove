@@ -73,3 +73,59 @@ Nenhum commit foi criado.
 
 Veja [decisões de autenticação](authentication.md) e
 [inventário dos arquivos](authentication-files.md).
+
+
+## Validação final — MASTER (10/09/2026)
+
+93 testes PostgreSQL aprovados, nenhum pulado. Ruff lint/formatação, mypy strict
+(42 arquivos), pip check, Biome (27 arquivos), TypeScript e build Next.js aprovados.
+Build Docker e Compose config --quiet aprovados. Migration 20260910_02 aplicada
+no banco local; Alembic current confirmou head e check não encontrou divergências.
+Upgrade/downgrade também foram testados em schemas isolados. Contêineres saudáveis.
+Smoke HTTP: /health 200, /master/professionals anônimo 401.
+Não foi executada validação visual ou automação de navegador.
+Avisos: Starlette/AnyIO deprecated alias; pip como root durante construção da imagem
+(a execução do backend usa appuser); Git informou conversão LF/CRLF.
+O aviso de lint frontend foi corrigido. Nenhuma dependência adicionada.
+
+
+## Dia 4 — Student (10/09/2026)
+
+166 testes PostgreSQL passaram, nenhum pulado. Ruff check e format --check,
+mypy strict (49 arquivos), pip check, Biome (42 arquivos), TypeScript e build
+Next.js aprovados. Compose config --quiet e build Docker aprovados.
+Migration 20260910_03 aplicada localmente; Alembic current confirmou head e check
+sem divergências. Upgrade/downgrade/check também passaram em schemas isolados.
+Contêineres saudáveis; /health 200 e /students/me anônimo 401.
+
+Verificação pontual com Chrome headless/CDP, sem dependência adicionada: onboarding
+em 390 px, aluno pendente, aprovação/edição/desativação/reativação pelo profissional,
+novo login de aluno ativo e listagem MASTER. Sem exceções JavaScript não tratadas.
+Capturas mobile e desktop inspecionadas. Dados sintéticos em schema temporário.
+Não há suíte E2E persistente no repositório.
+
+Falhas corrigidas durante a implementação: formatação/linhas longas de Python,
+tipos de índices heterogêneos em testes, nome de prop role confundido pelo lint
+com ARIA (renomeado allowedRole). Na automação de navegador, uma espera por
+hidratação React corrigiu o preenchimento inicial. O helper teve demora de leitura
+local de módulos Python antes de iniciar; isso não foi falha da aplicação.
+O aviso interno Starlette/AnyIO permanece visível. Git também informa LF/CRLF.
+
+
+## Dia 5 — Dashboards (10/09/2026)
+
+185 testes passaram, nenhum pulado. Ruff check/format aprovados; mypy strict em
+53 arquivos sem erros; pip check sem incompatibilidades. Biome em 48 arquivos,
+TypeScript e build Next.js aprovados. Docker build e Compose config --quiet
+aprovados. Backend atualizado e saudável; Alembic current 20260910_03 (head) e
+check sem divergências. Nenhuma migration nova.
+
+Chrome/CDP com API real e schema isolado: os três dashboards em 1366, 1024, 768 e
+375 px, sem overflow horizontal; login por role, anônimo, acesso de papel errado,
+navegação, logout, erro de API com retry e estados pendente/rejeitado/carteira vazia
+aprovados. Áreas de toque da navegação/logout verificadas; capturas representativas
+inspecionadas. Nenhuma exceção JavaScript não tratada. Não foi instalada suíte E2E.
+
+Aviso conhecido Starlette/AnyIO permanece visível; avisos LF/CRLF do Git também.
+O teste de erro usa bloqueio temporário de rede no navegador e recupera acesso
+real antes do retry. Não há mock permanente. Detalhes em dashboards.md.

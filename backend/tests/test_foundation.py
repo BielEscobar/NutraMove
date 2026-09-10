@@ -1,3 +1,4 @@
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from starlette.exceptions import HTTPException
@@ -67,3 +68,20 @@ def test_http_error_preserves_headers(app: FastAPI, client: TestClient) -> None:
     response = client.get("/test-unavailable")
     assert response.status_code == 503
     assert response.headers["retry-after"] == "30"
+
+
+def test_unexpected_error_does_not_log_personal_data(
+    app: FastAPI, client: TestClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    secret = "person@example.test private-profile"
+
+    @app.get("/test-sensitive-error")
+    def sensitive_error() -> None:
+        raise RuntimeError(secret)
+
+    response = client.get("/test-sensitive-error", headers={"Origin": "http://localhost:3000"})
+    assert response.status_code == 500
+    assert secret not in caplog.text
+    assert "RuntimeError" in caplog.text
+    assert "sensitive_error" in caplog.text
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"

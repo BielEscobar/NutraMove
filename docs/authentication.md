@@ -139,3 +139,16 @@ nenhum teste ou aviso de código é desabilitado.
 - [Starlette: cookies](https://starlette.dev/responses/)
 - [SQLAlchemy: transações em testes](https://docs.sqlalchemy.org/en/20/orm/session_transaction.html)
 - [Inter e licença](https://github.com/google/fonts/tree/main/ofl/inter)
+
+
+## Integração Student — Dia 4
+
+A autenticação existente foi reutilizada. Student pendente ou rejeitado mantém
+User.is_active=true para consultar seus próprios dados e situação. Desativação
+administrativa define is_active=false e revoga todas as sessões; reativação exige
+novo login. Cadastro público não abre sessão automaticamente e fixa a role STUDENT
+no backend. Detalhes em [students.md](students.md).
+
+A proteção dos logs foi ampliada: SafeErrorMiddleware registra somente tipo e
+localização da falha, a engine oculta parâmetros SQL e o contêiner não registra
+URLs de acesso que possam conter dados pessoais nas buscas.

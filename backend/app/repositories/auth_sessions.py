@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -22,3 +23,7 @@ def get_authenticated_user(db: Session, token: str) -> User | None:
 
 def revoke(db: Session, token: str) -> None:
     db.execute(delete(AuthSession).where(AuthSession.token_hash == token_digest(token)))
+
+
+def revoke_all(db: Session, user_id: UUID) -> None:
+    db.execute(delete(AuthSession).where(AuthSession.user_id == user_id))

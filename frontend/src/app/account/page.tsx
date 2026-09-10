@@ -1,6 +1,7 @@
 "use client";
 
 import { Leaf, LoaderCircle, LogOut } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ApiError, apiRequest, type User } from "@/lib/api";
@@ -111,6 +112,24 @@ export default function AccountPage() {
                 <dd className="mt-1">{roleLabels[user.role]}</dd>
               </div>
             </dl>
+            {user.role === "PROFESSIONAL" && (
+              <Link
+                href="/professional/students"
+                className="master-primary mt-6"
+              >
+                Meus alunos
+              </Link>
+            )}
+            {user.role === "STUDENT" && (
+              <Link href="/student" className="master-primary mt-6">
+                Meu cadastro
+              </Link>
+            )}
+            {user.role === "MASTER" && (
+              <Link href="/master" className="master-primary mt-6">
+                Abrir administração
+              </Link>
+            )}
           </section>
         ) : (
           !error && (

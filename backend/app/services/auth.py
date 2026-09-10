@@ -16,7 +16,7 @@ from app.schemas.auth import LoginRequest, MasterCreate
 def login(
     db: Session, data: LoginRequest, session_seconds: int, previous_token: str | None
 ) -> tuple[User, str]:
-    user = users.get_by_email(db, str(data.email))
+    user = users.get_by_email(db, str(data.email), for_update=True)
     valid = verify_password(
         data.password.get_secret_value(), user.password_hash if user else DUMMY_HASH
     )

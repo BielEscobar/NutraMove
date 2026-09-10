@@ -1,86 +1,22 @@
-from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 from uuid import uuid4
 
 import pytest
-from alembic.config import Config
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine, select, text
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from alembic import command
 from app.api.dependencies import require_roles
-from app.core.config import BACKEND_DIR, get_settings
-from app.core.security import hash_password, token_digest, verify_password
-from app.db.session import get_db
+from app.core.security import token_digest, verify_password
 from app.models import AuthSession, User, UserRole
 from app.schemas.auth import MasterCreate
 from app.services.auth import create_master
 
 ORIGIN = {"Origin": "http://localhost:3000"}
 PASSWORD = "test-only-password-2026"
-
-
-@pytest.fixture(scope="module")
-def auth_engine() -> Iterator[Engine]:
-    # Only this generated schema is created/dropped. Existing tables are never touched.
-    schema = "test_auth_" + uuid4().hex
-    url = str(get_settings().database_url)
-    control = create_engine(url, connect_args={"connect_timeout": 5})
-    with control.begin() as connection:
-        connection.execute(text(f'CREATE SCHEMA "{schema}"'))
-    engine = create_engine(
-        url, connect_args={"options": f"-csearch_path={schema}", "connect_timeout": 5}
-    )
-    try:
-        config = Config(str(BACKEND_DIR / "alembic.ini"))
-        with engine.begin() as connection:
-            config.attributes["connection"] = connection
-            command.upgrade(config, "head")
-            command.check(config)
-        yield engine
-        # Verify downgrade and upgrade only in the disposable test schema.
-        with engine.begin() as connection:
-            config.attributes["connection"] = connection
-            command.downgrade(config, "base")
-            command.upgrade(config, "head")
-            command.check(config)
-    finally:
-        engine.dispose()
-        with control.begin() as connection:
-            connection.execute(text(f'DROP SCHEMA "{schema}" CASCADE'))
-        control.dispose()
-
-
-@pytest.fixture
-def db(auth_engine: Engine, app: FastAPI) -> Iterator[Session]:
-    with auth_engine.connect() as connection:
-        transaction = connection.begin()
-        with Session(bind=connection, join_transaction_mode="create_savepoint") as session:
-
-            def override_db() -> Iterator[Session]:
-                yield session
-
-            app.dependency_overrides[get_db] = override_db
-            yield session
-        transaction.rollback()
-    app.dependency_overrides.pop(get_db, None)
-
-
-@pytest.fixture
-def user(db: Session) -> User:
-    user = User(
-        name="Test Master",
-        email="master@example.com",
-        password_hash=hash_password(PASSWORD),
-        role=UserRole.MASTER,
-    )
-    db.add(user)
-    db.commit()
-    return user
 
 
 def sign_in(client: TestClient, email: str = "master@example.com") -> None:

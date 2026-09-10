@@ -1,9 +1,11 @@
 "use client";
 
 import { ArrowRight, Leaf, LoaderCircle, LockKeyhole } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { ApiError, apiRequest, type User } from "@/lib/api";
+import { homeForRole } from "@/lib/students";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,8 +16,8 @@ export default function LoginPage() {
   useEffect(() => {
     const controller = new AbortController();
     apiRequest<User>("/auth/me", { signal: controller.signal })
-      .then(() => {
-        if (!controller.signal.aborted) router.replace("/account");
+      .then((user) => {
+        if (!controller.signal.aborted) router.replace(homeForRole(user.role));
       })
       .catch((cause: unknown) => {
         if (controller.signal.aborted) return;
@@ -43,7 +45,8 @@ export default function LoginPage() {
           password: String(form.get("password") ?? ""),
         }),
       });
-      router.replace("/account");
+      const user = await apiRequest<User>("/auth/me");
+      router.replace(homeForRole(user.role));
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Não foi possível entrar.",
@@ -157,8 +160,9 @@ export default function LoginPage() {
             </form>
           )}
           <p className="mt-7 text-xs leading-5 text-muted-foreground">
-            Precisa de acesso? Entre em contato com o responsável pela sua
-            conta.
+            <Link className="text-primary underline" href="/register">
+              Criar meu cadastro de aluno
+            </Link>
           </p>
         </div>
       </section>

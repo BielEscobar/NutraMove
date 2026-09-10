@@ -1,7 +1,7 @@
 # NUTRAMOVE
 
-Fundação e autenticação implementadas. Gestão de profissionais, alunos e IA ainda
-não fazem parte desta entrega.
+Fundação, autenticação, gestão de profissionais e módulo Student implementados.
+Onboarding e isolamento entre profissionais incluídos. Diet, Workout e IA não implementados.
 
 - Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui e Lucide.
 - Backend: Python 3.13, FastAPI, SQLAlchemy 2.0, Pydantic e Alembic.
@@ -88,7 +88,7 @@ Dentro de backend/:
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements-dev.txt
 .venv/Scripts/python.exe -m alembic upgrade head
-.venv/Scripts/python.exe -m uvicorn app.main:create_app --factory --reload
+.venv/Scripts/python.exe -m uvicorn app.main:create_app --factory --reload --no-access-log
 ```
 
 Não execute o backend local e o contêiner na mesma porta simultaneamente.
@@ -151,3 +151,29 @@ Para parar os serviços preservando o volume de dados:
 ```powershell
 docker compose --env-file infra/.env -f infra/compose.yaml down
 ```
+
+
+## Gestão de profissionais
+
+MASTER acessa /master após login. Veja [documentação do módulo](docs/professionals.md).
+Aplique a migration 20260910_02 com Alembic antes de usar as novas rotas.
+
+
+## Student e onboarding
+
+Acesse /register para cadastro em seis etapas. O link de cadastro com profissional
+fica no detalhe desse profissional na área MASTER. Cadastro sem código fica sem
+vínculo e é administrado apenas por MASTER. Login direciona PROFESSIONAL para
+/professional e STUDENT para /student.
+
+A migration atual é 20260910_03. Veja [Student](docs/students.md),
+[inventário de arquivos](docs/student-files.md) e [contexto atualizado](docs/relatorio-contexto-proximos-prompts.md).
+Cadastro público e login ainda precisam de proteção contra abuso antes de exposição pública.
+
+
+## Dashboards por perfil
+
+Após login e consulta a /auth/me: MASTER abre /master, PROFESSIONAL abre
+/professional e STUDENT abre /student. O perfil completo do aluno fica em
+/student/profile. Veja [dashboards e navegação](docs/dashboards.md) para métricas,
+endpoints, arquivos e validação responsiva. Não houve nova migration nesta etapa.
