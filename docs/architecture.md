@@ -74,14 +74,14 @@ escopo também nas mutações; acesso cruzado retorna 404.
 
 A relação User–Student é 1:1; Professional–Student é 1:N, com vínculo opcional.
 Os serviços controlam criação atômica e transições de status, sem repositório genérico.
-A migration atual é 20260910_04; revisões anteriores foram preservadas.
+A migration atual é 20260910_05; revisões anteriores foram preservadas.
 
 Frontend usa componentes de onboarding e gestão em components/students e um hook
 compartilhado useApiResource. Os contratos de listagem e detalhe são separados.
 SafeErrorMiddleware e logs sem valores pessoais protegem os dados do cadastro.
 
 Consulte [profissionais](professionals.md), [Student](students.md) e
-[arquivos do Dia 4](student-files.md). Workout e IA não foram implementados. Dietas estão descritas abaixo.
+[arquivos do Dia 4](student-files.md). IA e Evolution não foram implementados. Dietas estão descritas abaixo.
 
 
 ## Dashboards — Dia 5
@@ -102,3 +102,11 @@ Food e FoodSubstitution em árvore relacional. Nome e conteúdo são snapshots p
 Repositories aplicam ownership; services controlam bloqueios, transações e publicação.
 O frontend reutiliza AppShell e useApiResource. Veja [dietas](diets.md) para contratos,
 revisão concorrente, arquivos e limites. Migration 20260910_04 adiciona cinco tabelas.
+
+## Treinos — Dia 7
+
+Workout → WorkoutVersion → WorkoutDay → WorkoutExercise. Metadata e prescrição são
+snapshots por versão, com o mesmo fluxo de autorização, bloqueio, revisão e publicação
+de Diet. Repetições, carga e duração são textuais; séries e descanso são estruturados.
+Sem abstração genérica de planos ou dependências novas. Consulte [workouts.md](workouts.md).
+A migration 20260910_05 adiciona quatro tabelas; as anteriores permanecem intactas.

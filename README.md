@@ -1,7 +1,7 @@
 # NUTRAMOVE
 
 Fundação, autenticação, gestão de profissionais e módulo Student implementados.
-Onboarding e isolamento entre profissionais incluídos. Dietas com versionamento e publicação implementadas. Workout e IA não implementados.
+Onboarding e isolamento entre profissionais incluídos. Dietas com versionamento e publicação implementadas. Treinos com versionamento e publicação implementados. IA e Evolution não implementados.
 
 - Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui e Lucide.
 - Backend: Python 3.13, FastAPI, SQLAlchemy 2.0, Pydantic e Alembic.
@@ -166,7 +166,7 @@ fica no detalhe desse profissional na área MASTER. Cadastro sem código fica se
 vínculo e é administrado apenas por MASTER. Login direciona PROFESSIONAL para
 /professional e STUDENT para /student.
 
-A migration atual é 20260910_04. Veja [Student](docs/students.md),
+A migration atual é 20260910_05. Veja [Student](docs/students.md),
 [inventário de arquivos](docs/student-files.md) e [contexto atualizado](docs/relatorio-contexto-proximos-prompts.md).
 Cadastro público e login ainda precisam de proteção contra abuso antes de exposição pública.
 
@@ -198,3 +198,9 @@ As contas sao locais ao banco configurado; nao sao contas padrao de producao.
 Professional acessa Meus alunos → detalhe → Dieta e versões. Student acessa Minha dieta.
 MASTER possui leitura. Consulte [dietas](docs/diets.md) para modelos, endpoints, fluxo e validação.
 Aplique alembic upgrade head antes de utilizar o módulo.
+
+## Treinos e versões — Dia 7
+
+Professional: Meus alunos → detalhe → Treino e versões. Student: Meu treino.
+MASTER consulta sem editar. Aplique alembic upgrade head para instalar a revisão 20260910_05.
+Veja [treinos](docs/workouts.md) para modelos, endpoints, permissões, editor e validação.

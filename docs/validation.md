@@ -150,3 +150,26 @@ Validação local final: Compose config aprovado; Docker backend e PostgreSQL sa
 Alembic current = 20260910_04 (head), check sem divergências. A verificação auxiliar
 teve um erro de tipo ao passar PostgresDsn diretamente para create_engine; corrigida
 para str apenas no comando de inspeção, sem alteração no código da aplicação.
+
+## Dia 7 — Workout (10 de setembro de 2026)
+
+- pytest completo: 260 passaram, nenhum pulado; 43 específicos de treino.
+- Ruff check e format --check aprovados (68 arquivos); mypy strict: 68 arquivos sem erros.
+- pip check aprovado; Biome: 83 arquivos aprovado; TypeScript e build Next.js aprovados.
+- Compose config --quiet e build Docker backend aprovados.
+- Migration 20260910_05 revisada; upgrade/downgrade/check passaram nos schemas de teste.
+- Nenhuma dependência nova; nenhum teste pulado. Aviso interno Starlette/AnyIO permanece.
+
+A conexão de inspeção por localhost ficou pendente; foi encerrada e substituída por
+127.0.0.1 com timeout na execução dos testes e geração da migration, sem alterar .env.
+Ajustes iniciais de formatação foram corrigidos. O teste de navegador precisou aguardar
+Chrome iniciar e corrigir seletores de texto/link; isso não exigiu mudança na aplicação.
+
+Validação final do Dia 7: migration local 20260910_05 (head), Alembic check sem divergências,
+backend e PostgreSQL saudáveis. Chrome headless com API real validou login, abertura do
+aluno, criação de divisão/exercício, salvar/publicar, leitura Student, duplicação/edição,
+histórico intacto antes de republicar e entrega da versão 2 ao aluno. MASTER somente leitura.
+Editor e leitor foram testados em 1366, 1024, 768 e 375 px sem overflow horizontal ou
+exceções JavaScript não tratadas. Capturas representativas dos quatro tamanhos foram
+inspecionadas visualmente, incluindo instruções abertas em 375 px. Não há suíte E2E
+persistente; os testes usaram schema e contas temporários, removidos ao terminar.

@@ -195,6 +195,12 @@ export function StudentDetail({ area, id }: { area: StudentArea; id: string }) {
             >
               Dieta e versões
             </Link>
+            <Link
+              className="master-secondary mt-4"
+              href={`/${area}/students/${data.id}/workouts`}
+            >
+              Treino e versões
+            </Link>
             <p className="mt-2 break-all text-muted-foreground">{data.email}</p>
             <p className="mt-3 font-medium text-primary">
               {statuses[data.status]}

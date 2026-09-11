@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  Clock3,
-  Dumbbell,
-  Leaf,
-  Ruler,
-  Scale,
-  Target,
-  TrendingUp,
-} from "lucide-react";
+import { Clock3, Leaf, Ruler, Scale, Target, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { EmptyState, MetricCard } from "@/components/dashboard/metric-card";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
+import { WorkoutAvailability } from "@/components/workouts/workout-availability";
 import type { StudentDashboard } from "@/lib/dashboard";
 import { goals, statuses } from "@/lib/students";
 import { useApiResource } from "@/lib/use-api-resource";
@@ -114,18 +107,13 @@ export default function StudentPage() {
         <Leaf className="size-4" aria-hidden="true" />
         Minha dieta
       </Link>
+      <WorkoutAvailability />
       {data.status === "ACTIVE" && (
         <section
           aria-label="Áreas em preparação"
           className="mt-7 grid gap-4 lg:grid-cols-3"
         >
           {[
-            {
-              title: "Meu treino",
-              text: "Ainda não disponível.",
-              icon: Dumbbell,
-            },
-
             {
               title: "Minha evolução",
               text: "Em preparação.",

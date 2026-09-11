@@ -1,13 +1,13 @@
 # NUTRAMOVE — Contexto atual para próximos prompts
 
-Atualizado em 10 de setembro de 2026, após o Dia 6.
+Atualizado em 10 de setembro de 2026, após o Dia 7.
 
 ## Estado real
 
 Implementados: fundação, autenticação por sessão opaca, MASTER + gestão de
 profissionais, Student + onboarding + isolamento e dashboards por perfil.
-Dietas com versões e publicação foram implementadas no Dia 6. Não existem Workout, IA, transferência de alunos ou notificações.
-O trabalho encerrou no Dia 6; próximas funcionalidades exigem autorização.
+Dietas com versões e publicação foram implementadas no Dia 6. Workout foi implementado no Dia 7. Não existem IA, Evolution, transferência de alunos ou notificações.
+O trabalho encerrou no Dia 7; próximas funcionalidades exigem autorização.
 
 Repositório informado: BielEscobar/NutraMove. Branch local: develop.
 main é reservada para produção. As alterações locais dos Dias 3, 4 e 5 estão sem
@@ -226,7 +226,7 @@ Diet → DietVersion → Meal → Food → FoodSubstitution, com snapshots e rev
 Professional cria/edita/duplica/publica apenas na própria carteira; MASTER somente lê.
 Student ACTIVE consulta somente a dieta aprovada atual em /student/diet. Publicação arquiva
 a anterior do aluno atomicamente. DRAFT/MANUAL é o padrão; PENDING_REVIEW/AI_GENERATED
-preparam um contrato futuro sem integração real. Não há Workout ou autorização para Dia 7.
+preparam um contrato futuro sem integração real. Este trecho registra o encerramento do Dia 6; Workout foi autorizado e implementado no Dia 7, descrito abaixo.
 Migration 04 preserva as anteriores. Resultado atual: 217 testes, Ruff, mypy (61 arquivos),
 pip check, Biome (65 arquivos), tipos e build aprovados. Chrome validou o fluxo completo
 e quatro larguras sem overflow. Não há suíte E2E persistente. Aviso Starlette/AnyIO permanece.
@@ -234,3 +234,37 @@ O comando local create_demo_users e alterações anteriores no README foram pres
 
 Banco local atualizado para 20260910_04 (head), Alembic check sem divergências e
 contêineres saudáveis. Configuração Compose e imagem Docker validadas.
+
+## Atualização do Dia 7 — Workout
+
+Consulte [workouts.md](workouts.md) para modelos, endpoints, inventário e decisões.
+O checkout inicial estava limpo em develop. HEAD real inicial: 20260910_04; nova revisão:
+20260910_05, com workouts, workout_versions, workout_days e workout_exercises.
+
+Professional cria/edita/duplica/publica para aluno próprio; MASTER somente lê; Student
+ACTIVE consulta exclusivamente seu treino APPROVED em /student/workout (ou workout:null).
+Os filhos não têm endpoints próprios ou IDs aceitos na edição composta. Datas, nome,
+objetivo e prescrição são copiados por versão. Séries 1–100, descanso 0–86400 segundos,
+frequência 1–7; repetições/carga/duração textuais. Divisões livres, sem limite A/B/C.
+
+Publicação arquiva a anterior do aluno na mesma transação, com autor/data; duplicação
+produz DRAFT/MANUAL com novos IDs e sem aprovação. expected_revision e bloqueios evitam
+sobrescrita obsoleta e numeração concorrente. Diet não foi refatorado nem teve regras alteradas.
+
+Frontend inclui editor, histórico, leitor móvel e Meu treino na navegação. Dashboard
+Student consulta disponibilidade real e oferece Ver treino; Minha dieta foi preservada.
+Nenhuma dependência nova. Resultado: 260 testes, incluindo 43 de treino; Ruff, mypy
+(68 arquivos), pip check, Biome (83 arquivos), TypeScript e build Next.js aprovados.
+Permanece o aviso interno Starlette/AnyIO. Veja validation.md para validação final.
+
+Não existem IA real, biblioteca global, mídia de exercício, cronômetro, execução do treino,
+registro de carga, progressão ou Evolution. Paginação e suíte E2E persistente seguem
+pendentes. source/status permitem futura sugestão revisada, sem autorizar geração ou Dia 8.
+Validação final do Dia 7: migration local 20260910_05 (head), Alembic check sem divergências,
+backend e PostgreSQL saudáveis. Chrome headless com API real validou login, abertura do
+aluno, criação de divisão/exercício, salvar/publicar, leitura Student, duplicação/edição,
+histórico intacto antes de republicar e entrega da versão 2 ao aluno. MASTER somente leitura.
+Editor e leitor foram testados em 1366, 1024, 768 e 375 px sem overflow horizontal ou
+exceções JavaScript não tratadas. Capturas representativas dos quatro tamanhos foram
+inspecionadas visualmente, incluindo instruções abertas em 375 px. Não há suíte E2E
+persistente; os testes usaram schema e contas temporários, removidos ao terminar.

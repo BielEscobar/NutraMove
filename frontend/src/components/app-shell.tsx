@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Dumbbell,
   LayoutDashboard,
   Leaf,
   LogOut,
@@ -29,6 +30,7 @@ const navigation = {
     { href: "/student", label: "Início", icon: LayoutDashboard },
     { href: "/student/profile", label: "Meu perfil", icon: UserRound },
     { href: "/student/diet", label: "Minha dieta", icon: Leaf },
+    { href: "/student/workout", label: "Meu treino", icon: Dumbbell },
   ],
 };
 const labels = {

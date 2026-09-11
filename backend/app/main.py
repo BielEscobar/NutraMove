@@ -11,6 +11,9 @@ from app.api.professionals import router as professionals_router
 from app.api.students import master_router as master_students_router
 from app.api.students import professional_router as professional_students_router
 from app.api.students import router as students_router
+from app.api.workouts import master_router as master_workouts_router
+from app.api.workouts import professional_router as professional_workouts_router
+from app.api.workouts import student_router as student_workouts_router
 from app.core.config import Settings, get_settings
 from app.core.errors import SafeErrorMiddleware, register_error_handlers
 
@@ -42,4 +45,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(professional_diets_router)
     app.include_router(master_diets_router)
     app.include_router(student_diets_router)
+    app.include_router(professional_workouts_router)
+    app.include_router(master_workouts_router)
+    app.include_router(student_workouts_router)
     return app
