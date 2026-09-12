@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.api.dependencies import CurrentUser, DbSession, require_roles
 from app.api.professionals import no_cache
 from app.models import UserRole
-from app.repositories import dashboards, professionals
+from app.repositories import dashboards, professionals, reevaluations
 from app.schemas.dashboard import MasterDashboard, ProfessionalDashboard, StudentDashboard
 from app.services.students import get
 
@@ -33,8 +33,12 @@ def master_dashboard(db: DbSession, actor: CurrentUser) -> MasterDashboard:
 )
 def professional_dashboard(db: DbSession, actor: CurrentUser) -> ProfessionalDashboard:
     metrics, _ = dashboards.student_metrics(db, actor)
+    pending, in_review = reevaluations.open_counts(db, actor)
     return ProfessionalDashboard(
-        students=metrics, recent_students=dashboards.recent_students(db, actor)
+        reevaluations_pending=pending,
+        reevaluations_in_review=in_review,
+        students=metrics,
+        recent_students=dashboards.recent_students(db, actor),
     )
 
 

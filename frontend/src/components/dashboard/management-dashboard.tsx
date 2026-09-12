@@ -97,6 +97,21 @@ export function ManagementDashboard({
                 />
               )}
             </section>
+            {"reevaluations_pending" in data && (
+              <section className="mt-5 rounded-lg border bg-white p-5">
+                <h2 className="font-semibold">Reavaliações</h2>
+                <p className="mt-3 text-sm">
+                  Pendentes: {data.reevaluations_pending} · Em análise:{" "}
+                  {data.reevaluations_in_review}
+                </p>
+                <Link
+                  href="/professional/reevaluation-requests"
+                  className="master-secondary mt-4"
+                >
+                  Ver reavaliações
+                </Link>
+              </section>
+            )}
             <section className="mt-7 grid gap-5 lg:grid-cols-2">
               <div className="rounded-lg border bg-white p-6">
                 <h2 className="font-semibold">Para acompanhar</h2>

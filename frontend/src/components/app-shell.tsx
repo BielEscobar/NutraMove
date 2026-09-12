@@ -1,10 +1,13 @@
 "use client";
 
 import {
+  Droplets,
   Dumbbell,
   LayoutDashboard,
   Leaf,
   LogOut,
+  MessageSquare,
+  TrendingUp,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -21,16 +24,33 @@ const navigation = {
     { href: "/master", label: "Dashboard", icon: LayoutDashboard },
     { href: "/master/professionals", label: "Profissionais", icon: UsersRound },
     { href: "/master/students", label: "Alunos", icon: UserRound },
+    {
+      href: "/master/reevaluation-requests",
+      label: "Reavaliações",
+      icon: MessageSquare,
+    },
   ],
   PROFESSIONAL: [
     { href: "/professional", label: "Dashboard", icon: LayoutDashboard },
     { href: "/professional/students", label: "Meus alunos", icon: UsersRound },
+    {
+      href: "/professional/reevaluation-requests",
+      label: "Reavaliações",
+      icon: MessageSquare,
+    },
   ],
   STUDENT: [
     { href: "/student", label: "Início", icon: LayoutDashboard },
     { href: "/student/profile", label: "Meu perfil", icon: UserRound },
     { href: "/student/diet", label: "Minha dieta", icon: Leaf },
     { href: "/student/workout", label: "Meu treino", icon: Dumbbell },
+    { href: "/student/evolution", label: "Minha evolução", icon: TrendingUp },
+    { href: "/student/hydration", label: "Hidratação", icon: Droplets },
+    {
+      href: "/student/reevaluation-requests",
+      label: "Solicitar reavaliação",
+      icon: MessageSquare,
+    },
   ],
 };
 const labels = {

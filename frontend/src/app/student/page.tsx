@@ -1,8 +1,10 @@
 "use client";
 
-import { Clock3, Leaf, Ruler, Scale, Target, TrendingUp } from "lucide-react";
+import { Clock3, Leaf, Ruler, Scale, Target } from "lucide-react";
 import Link from "next/link";
 import { EmptyState, MetricCard } from "@/components/dashboard/metric-card";
+import { EvolutionSummary } from "@/components/evolution/evolution-summary";
+import { HydrationCard } from "@/components/hydration/hydration-card";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
 import { WorkoutAvailability } from "@/components/workouts/workout-availability";
 import type { StudentDashboard } from "@/lib/dashboard";
@@ -108,32 +110,8 @@ export default function StudentPage() {
         Minha dieta
       </Link>
       <WorkoutAvailability />
-      {data.status === "ACTIVE" && (
-        <section
-          aria-label="Áreas em preparação"
-          className="mt-7 grid gap-4 lg:grid-cols-3"
-        >
-          {[
-            {
-              title: "Minha evolução",
-              text: "Em preparação.",
-              icon: TrendingUp,
-            },
-          ].map(({ title, text, icon: Icon }) => (
-            <div
-              key={title}
-              className="rounded-lg border border-dashed bg-white p-5"
-            >
-              <Icon
-                className="mb-3 size-5 text-muted-foreground"
-                aria-hidden="true"
-              />
-              <h2 className="font-medium">{title}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{text}</p>
-            </div>
-          ))}
-        </section>
-      )}
+      <EvolutionSummary />
+      <HydrationCard />
     </div>
   );
 }

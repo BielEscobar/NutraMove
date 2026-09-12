@@ -74,14 +74,14 @@ escopo também nas mutações; acesso cruzado retorna 404.
 
 A relação User–Student é 1:1; Professional–Student é 1:N, com vínculo opcional.
 Os serviços controlam criação atômica e transições de status, sem repositório genérico.
-A migration atual é 20260910_05; revisões anteriores foram preservadas.
+A migration atual é 20260911_07; revisões anteriores foram preservadas.
 
 Frontend usa componentes de onboarding e gestão em components/students e um hook
 compartilhado useApiResource. Os contratos de listagem e detalhe são separados.
 SafeErrorMiddleware e logs sem valores pessoais protegem os dados do cadastro.
 
 Consulte [profissionais](professionals.md), [Student](students.md) e
-[arquivos do Dia 4](student-files.md). IA e Evolution não foram implementados. Dietas estão descritas abaixo.
+[arquivos do Dia 4](student-files.md). IA não foi implementada. Evolution foi adicionada no Dia 8. Dietas estão descritas abaixo.
 
 
 ## Dashboards — Dia 5
@@ -110,3 +110,31 @@ snapshots por versão, com o mesmo fluxo de autorização, bloqueio, revisão e 
 de Diet. Repetições, carga e duração são textuais; séries e descanso são estruturados.
 Sem abstração genérica de planos ou dependências novas. Consulte [workouts.md](workouts.md).
 A migration 20260910_05 adiciona quatro tabelas; as anteriores permanecem intactas.
+
+## Evolução — Dia 8
+
+Student/Professional → Assessment → Measurement. Avaliação é o evento histórico, sem
+WeightRecord redundante. Services sincronizam o peso mais recente do histórico com Student
+na mesma transação e sob bloqueio. O repository aplica ownership e filtros temporais SQL.
+IMC é calculado com peso e altura da avaliação, sem diagnóstico ou persistência redundante.
+Recharts 3.10.1 foi adicionado ao frontend para séries responsivas com tooltip e alternativa
+textual. Veja [evolution.md](evolution.md) para correções, limitações e arquivos. Migration
+20260911_06 preserva as anteriores e adiciona duas tabelas.
+
+
+## Hidratação e reavaliações — Dia 9
+
+Student → WaterRecord registra consumo em ml. Meta existente em Student continua
+em litros. core/time.py centraliza limites de datas; BUSINESS_TIMEZONE é validado em
+Settings. Agregações usam SQL; dashboard usa resumo sem registros.
+
+Student → ReevaluationRequest preserva destinatário original, categoria, motivo,
+resposta, estado e responsáveis internos. Acesso de Professional deriva da carteira
+atual. Uma solicitação aberta por aluno é protegida por locks e índice parcial.
+MASTER consulta; Student envia/cancela pendente; Professional atende a carteira.
+
+Rotas/schemas/repositories/services seguem as camadas existentes. Components hydration
+e reevaluations reutilizam AppShell, useApiResource, cliente HTTP e Recharts.
+Migration 20260911_07 cria as duas tabelas sem modificar revisões anteriores.
+Veja [hydration.md](hydration.md), [reevaluations.md](reevaluations.md) e
+[dia9-relatorio.md](dia9-relatorio.md). Não há notificações, AI ou novas dependências.

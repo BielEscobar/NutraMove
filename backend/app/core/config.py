@@ -2,6 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Self
 from urllib.parse import urlsplit
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import Field, PostgresDsn, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -22,6 +23,16 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000"]
     session_seconds: int = Field(default=3600, ge=300, le=604800)
     cookie_secure: bool = False
+    business_timezone: str = "America/Sao_Paulo"
+
+    @field_validator("business_timezone")
+    @classmethod
+    def valid_timezone(cls, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("Use a valid IANA timezone.") from None
+        return value
 
     @property
     def session_cookie_name(self) -> str:

@@ -46,6 +46,20 @@ export async function apiRequest<T>(
           : "A situação do cadastro não permite esta ação. Atualize os dados.",
       422: "Revise os campos informados e tente novamente.",
     };
+    if (response.status === 409 && path.includes("/reevaluation-requests")) {
+      const body: unknown = await response.json().catch(() => null);
+      if (
+        body &&
+        typeof body === "object" &&
+        "error" in body &&
+        body.error &&
+        typeof body.error === "object" &&
+        "message" in body.error &&
+        typeof body.error.message === "string"
+      ) {
+        throw new ApiError(409, body.error.message);
+      }
+    }
     throw new ApiError(
       response.status,
       messages[response.status] ??

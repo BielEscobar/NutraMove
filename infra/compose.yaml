@@ -23,6 +23,7 @@ services:
     environment:
       APP_NAME: NUTRAMOVE API
       ENVIRONMENT: development
+      BUSINESS_TIMEZONE: ${BUSINESS_TIMEZONE:-America/Sao_Paulo}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-nutramove}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@db:5432/${POSTGRES_DB:-nutramove}
       CORS_ORIGINS: '["http://localhost:3000"]'
     ports:

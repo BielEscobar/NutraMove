@@ -29,6 +29,8 @@ class RecentStudent(BaseModel):
 
 
 class ProfessionalDashboard(BaseModel):
+    reevaluations_pending: int
+    reevaluations_in_review: int
     students: StudentMetrics
     recent_students: list[RecentStudent]
 

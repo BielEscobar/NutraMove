@@ -212,6 +212,6 @@ def test_queries_are_bounded(
     finally:
         event.remove(connection, "before_cursor_execute", capture)
     selects = [sql for sql in statements if sql.lstrip().upper().startswith("SELECT")]
-    assert len(selects) <= 5
+    assert len(selects) <= 7  # Includes scoped SQL counts for reevaluation requests.
     assert any("count(" in sql for sql in selects)
     assert any("LIMIT" in sql for sql in selects)

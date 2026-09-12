@@ -14,6 +14,8 @@ export type MasterDashboard = {
   students_unassigned: number;
 };
 export type ProfessionalDashboard = {
+  reevaluations_pending: number;
+  reevaluations_in_review: number;
   students: StudentMetrics;
   recent_students: {
     id: string;

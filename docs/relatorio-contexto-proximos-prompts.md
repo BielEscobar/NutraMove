@@ -1,17 +1,43 @@
 # NUTRAMOVE — Contexto atual para próximos prompts
 
-Atualizado em 10 de setembro de 2026, após o Dia 7.
+Atualizado em 11 de setembro de 2026, após o Dia 9.
 
 ## Estado real
 
 Implementados: fundação, autenticação por sessão opaca, MASTER + gestão de
 profissionais, Student + onboarding + isolamento e dashboards por perfil.
-Dietas com versões e publicação foram implementadas no Dia 6. Workout foi implementado no Dia 7. Não existem IA, Evolution, transferência de alunos ou notificações.
-O trabalho encerrou no Dia 7; próximas funcionalidades exigem autorização.
+Dietas com versões e publicação foram implementadas no Dia 6. Workout foi implementado no Dia 7. Evolução física foi implementada no Dia 8. Não existem IA, transferência de alunos ou notificações.
+Hidratação e solicitações de reavaliação foram implementadas no Dia 9.
+O trabalho encerrou no Dia 9; próximas funcionalidades exigem autorização.
 
 Repositório informado: BielEscobar/NutraMove. Branch local: develop.
-main é reservada para produção. As alterações locais dos Dias 3, 4 e 5 estão sem
-commit e foram preservadas. Confirme Git e arquivos antes de qualquer edição.
+main é reservada para produção. O Dia 8 começou com alteração local apenas em docs/workouts.md, preservada. Confirme Git e arquivos antes de qualquer edição.
+
+## Estado técnico atual — Dia 9
+
+HEAD local aplicado: **20260911_07**, dependente de 20260911_06. Alembic check sem
+divergências. 344 testes passaram; Ruff/format/mypy (89 arquivos), pip check,
+Biome, TypeScript, Next build, Compose e Docker aprovados. Resultados abaixo relativos
+a dias anteriores são históricos, não representam o HEAD atual.
+
+- WaterRecord registra inteiro amount_ml, consumed_at aware, created_at e Student.
+  Student.water_goal continua em litros. BUSINESS_TIMEZONE padrão America/Sao_Paulo.
+  Resumo/1/7/30 dias usam SUM e data local SQL; sem DELETE ou meta automática.
+- ReevaluationRequest tem DIET/WORKOUT/EVOLUTION/DIFFICULTY/OTHER e estados
+  PENDING/IN_REVIEW/COMPLETED/CANCELLED. Criação só Student ACTIVE com profissional ativo;
+  uma solicitação aberta total por aluno, protegida por lock e índice parcial.
+- Professional da carteira atual inicia análise, conclui com resposta ou cancela.
+  Student cancela somente pendente; MASTER somente consulta. Destinatário original
+  é preservado, mas não concede acesso isoladamente. Transferência segue pendente.
+- Menus Hidratação/Solicitar reavaliação no Student, Reavaliações no staff;
+  card de água real e contagens PENDING/IN_REVIEW no dashboard profissional.
+- Chrome/API real validou fluxo completo, duplicidade/cancelamento, meta, erro/retry,
+  leitura MASTER e isolamento; 1366/1024/768/375 px sem overflow nem exceções JS.
+- Nenhuma dependência nova no Dia 9. Sem commit. Alterações locais do Dia 8 preservadas.
+
+Leia [hidratação](hydration.md), [reavaliações](reevaluations.md) e
+[relatório completo](dia9-relatorio.md) antes do próximo prompt. Não implementar
+notificações, AI, transferência ou auditoria geral sem novo escopo autorizado.
 
 ## Regras do projeto
 
@@ -130,7 +156,7 @@ Dados de onboarding ficam apenas na memória da página.
 useApiResource reutiliza o carregamento existente, com cancelamento e erros.
 useMasterResource permanece como alias compatível.
 
-## Migrations e validação atual
+## Histórico de migrations e validação do Dia 5
 
 - 20260910_01: users e auth_sessions.
 - 20260910_02: professionals.
@@ -227,7 +253,7 @@ Professional cria/edita/duplica/publica apenas na própria carteira; MASTER some
 Student ACTIVE consulta somente a dieta aprovada atual em /student/diet. Publicação arquiva
 a anterior do aluno atomicamente. DRAFT/MANUAL é o padrão; PENDING_REVIEW/AI_GENERATED
 preparam um contrato futuro sem integração real. Este trecho registra o encerramento do Dia 6; Workout foi autorizado e implementado no Dia 7, descrito abaixo.
-Migration 04 preserva as anteriores. Resultado atual: 217 testes, Ruff, mypy (61 arquivos),
+Migration 04 preserva as anteriores. Resultado registrado no Dia 6: 217 testes, Ruff, mypy (61 arquivos),
 pip check, Biome (65 arquivos), tipos e build aprovados. Chrome validou o fluxo completo
 e quatro larguras sem overflow. Não há suíte E2E persistente. Aviso Starlette/AnyIO permanece.
 O comando local create_demo_users e alterações anteriores no README foram preservados.
@@ -268,3 +294,44 @@ Editor e leitor foram testados em 1366, 1024, 768 e 375 px sem overflow horizont
 exceções JavaScript não tratadas. Capturas representativas dos quatro tamanhos foram
 inspecionadas visualmente, incluindo instruções abertas em 375 px. Não há suíte E2E
 persistente; os testes usaram schema e contas temporários, removidos ao terminar.
+
+## Atualização do Dia 8 — Avaliações e evolução
+
+Veja [evolution.md](evolution.md) para contratos, arquivos e decisões completos.
+Assessment é o evento principal (data civil, peso/altura opcionais, notas, autoria e última
+correção, timestamps, edit_revision), com Measurement tipada e lateralidade opcional.
+Sem WeightRecord redundante, sem cópia automática do onboarding e sem avaliações fictícias.
+
+Peso atual deriva da avaliação mais recente COM peso: assessment_date, created_at, UUID
+(descendentes). Criação/correção e Student.weight são atômicos, sob bloqueio. Correção antiga
+e lançamento retroativo não vencem avaliação mais recente. Perfil não pode alterar weight
+quando já há peso histórico; a correção deve ocorrer na avaliação. Altura do perfil não muda.
+Peso existente pode ser corrigido, mas não removido. PATCH recebe conteúdo completo e
+expected_revision; preserva data/vínculo, atualiza autoria/timestamp/revisão. Não guarda
+valores anteriores da correção, apenas avaliações distintas e metadados da última alteração.
+
+IMC calculado no backend só com peso e altura do mesmo snapshot, sem diagnóstico. Falta
+de altura retorna null. Não usa altura atual do perfil para recalcular o passado.
+Professional opera apenas própria carteira (404 uniforme); Student consulta somente próprios
+registros; MASTER lê. Avaliações não possuem aprovação/publicação como Diet e Workout.
+
+Endpoints /professional/students/{id}/assessments e /evolution, /professional/assessments/{id};
+MASTER equivalentes GET; Student /student/evolution, /student/assessments e /{id}.
+Listagem paginada 20/máximo100; gráfico filtra no SQL 7d/30d/90d/6m/1y/all, resumo current
+global. Histórico completo da tela é independente do período. Sem polling ou cache adicional.
+
+Frontend tem Nova avaliação, correção, medidas, gráfico de uma série por vez, tooltip,
+alternativa textual, histórico, detalhe, Minha evolução e resumo real no dashboard.
+Recharts 3.10.1 instalado e lockfile atualizado; demais módulos preservados.
+Migration nova 20260911_06, dependente do HEAD real 20260910_05, aplicada localmente.
+293 testes passaram (33 novos), Ruff/mypy (75 arquivos)/pip check aprovados. Sem divergências
+Alembic; Compose e imagem Docker aprovados. Aviso interno Starlette/AnyIO permanece.
+
+Pendentes: auditoria de valores corrigidos, correção de datas, retenção/privacidade, limites
+do gráfico all e suíte E2E persistente. Não há IA, hidratação, workflow de reavaliação,
+notificações, fotos, gordura corporal, diagnóstico, alteração automática de planos ou Dia 9.
+
+Validação final Dia 8: Biome 97 arquivos, TypeScript e build Next.js aprovados. Chrome/API
+real validou duas avaliações, correção, gráficos/tooltip, perfis e quatro larguras sem overflow.
+Capturas inspecionadas; dados temporários removidos. Build EPERM de .next resolvido com
+limpeza somente dos artefatos gerados após encerrar o dev. Veja evolution.md e validation.md.

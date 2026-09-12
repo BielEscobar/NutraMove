@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import hydration, reevaluations
+from app.api.assessments import master_router as master_assessments_router
+from app.api.assessments import professional_router as professional_assessments_router
+from app.api.assessments import student_router as student_assessments_router
 from app.api.auth import router as auth_router
 from app.api.dashboards import router as dashboards_router
 from app.api.diets import master_router as master_diets_router
@@ -48,4 +52,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(professional_workouts_router)
     app.include_router(master_workouts_router)
     app.include_router(student_workouts_router)
+    app.include_router(professional_assessments_router)
+    app.include_router(master_assessments_router)
+    app.include_router(student_assessments_router)
+    for module in (hydration, reevaluations):
+        app.include_router(module.student_router)
+        app.include_router(module.professional_router)
+        app.include_router(module.master_router)
     return app

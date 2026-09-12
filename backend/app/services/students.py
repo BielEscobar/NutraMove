@@ -11,6 +11,7 @@ from app.core.security import hash_password
 from app.models import User, UserRole
 from app.models.student import Student, StudentStatus
 from app.repositories import auth_sessions, professionals, students, users
+from app.repositories.assessments import latest_weight
 from app.schemas.student import (
     StudentBrief,
     StudentCreate,
@@ -91,6 +92,9 @@ def get(db: Session, actor: User, student_id: UUID | None = None, *, lock: bool 
 def update(db: Session, actor: User, student_id: UUID, data: StudentUpdate) -> Student:
     student = get(db, actor, student_id, lock=True)
     changes = data.model_dump(exclude_unset=True)
+    recorded = latest_weight(db, student.id)
+    if recorded and "weight" in changes and changes["weight"] != recorded.weight_kg:
+        raise HTTPException(409, "Corrija o peso em Evolução para preservar o histórico.")
     profile_changes = {
         key: value for key, value in changes.items() if key in StudentProfile.model_fields
     }

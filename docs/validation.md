@@ -173,3 +173,100 @@ Editor e leitor foram testados em 1366, 1024, 768 e 375 px sem overflow horizont
 exceções JavaScript não tratadas. Capturas representativas dos quatro tamanhos foram
 inspecionadas visualmente, incluindo instruções abertas em 375 px. Não há suíte E2E
 persistente; os testes usaram schema e contas temporários, removidos ao terminar.
+
+## Validação final do Dia 8
+
+- pytest: 293 passaram, nenhum pulado; 33 específicos de avaliações.
+- Ruff check e format: aprovados; mypy strict: 75 arquivos sem erros; pip check aprovado.
+- Biome: 97 arquivos aprovado; TypeScript e build Next.js finais aprovados.
+- Compose config --quiet, build Docker, Alembic current/check aprovados.
+- Banco local em 20260911_06 (head); backend/PostgreSQL saudáveis; /health 200,
+  /student/evolution anônimo 401. Upgrade/downgrade/upgrade/check em schemas isolados.
+- Chrome headless e API real: estado vazio, duas avaliações, peso/altura/medida, gráfico,
+  filtro de período, tooltip, série de cintura, correção antiga preservando peso atual e
+  data, dashboard/consulta Student e consulta MASTER sem edição passaram.
+- Formulário, gráfico, histórico e medidas testados em 1366/1024/768/375 px sem overflow
+  horizontal. Capturas representativas inspecionadas; formulário e gráfico legíveis em
+  375 px. Nenhuma exceção JavaScript não tratada. Uma captura antecipada do gráfico foi
+  repetida após estabilizar o redimensionamento, confirmando SVG e pontos nos quatro tamanhos.
+- Testes de navegador usaram contas/schema temporários, removidos ao terminar. Não há
+  suíte E2E persistente. Contas demo e registros reais existentes foram preservados.
+
+Problemas encontrados: um comando de edição usou caminho relativo incorreto, corrigido
+sem alterar arquivo errado; ajustes de importação/tipagem e semântica ARIA foram corrigidos.
+Mypy exige exceção local prop-decorator para computed_field sobre property do Pydantic.
+O build final encontrou EPERM em .next no Windows; após encerrar o dev temporário e
+remover somente os artefatos gerados desse diretório verificado, o build passou.
+Permanece apenas o DeprecationWarning interno Starlette/AnyIO já conhecido.
+
+## Validação final do Dia 9 — Hidratação e reavaliações
+
+- Estado inicial: branch develop, alterações locais do Dia 8 preservadas;
+  Alembic HEAD e banco local confirmados em 20260911_06 antes da edição.
+- pytest completo: **344 passaram**, nenhum pulado; **51 testes novos**.
+  Os testes usam PostgreSQL e verificam upgrade/downgrade/upgrade/check em schemas isolados.
+- Testes específicos de hidratação/reavaliações/dashboard: 70 passaram na primeira rodada.
+- Ruff check e format --check aprovados; mypy strict: **89 arquivos**, sem erros.
+- pip check aprovado. Nenhuma dependência nova.
+- Biome/lint: **113 arquivos**, aprovado. TypeScript e build Next.js aprovados.
+- Compose config --quiet e Docker build aprovados.
+- Migration 20260911_07 revisada, aplicada localmente e backend atualizado.
+  Alembic current: 20260911_07 (head); check sem novas operações.
+
+### Verificações de dados e autorização
+
+Inteiro de água (incluindo rejeição de boolean/string/fração), horários aware,
+tolerância de futuro, data de negócio America/Sao_Paulo, fronteiras exatas do dia,
+histórico 1/7/30 dias e dia de 23 horas em fuso com DST. Agregações SQL, meta em litros
+convertida para ml, meta ausente/zero, percentual acima de 100 e restante não negativo.
+
+Reavaliações: cadastro ACTIVE/vínculo ativo, campos extras, categorias, motivo/resposta,
+um pedido aberto, workflow, autores/timestamps, cancelamento, filtros e paginação,
+contagens, Origin, MASTER somente leitura e Student/Professional isolados.
+Teste de concorrência com duas conexões reais retornou 201/409 e somente um registro.
+Índice parcial também foi exercitado por inserção direta conflitante.
+
+### Chrome e API real
+
+Schema test_browser_day9_* com contas sintéticas, API temporária 8001 e frontend 3001.
+Perfil Chrome headless próprio, sem utilizar sessão pessoal do navegador.
+
+- Student: login, hidratação, 250 + 500 = 750 ml, meta 2,5 L, 30%, histórico e gráfico.
+- Professional: leitura do consumo da carteira e alteração da meta para 3 L pelo
+  PATCH existente; percentual passou a 25% sem alterar o consumo.
+- Student solicita revisão de treino; dashboard Professional indica pendência;
+  inicia análise, responde e conclui; Student consulta a resposta/conclusão.
+- Outro Professional recebeu erro de registro não encontrado para hidratação e pedido.
+  MASTER consultou sem campo de resposta/ações de workflow.
+- Erro de rede de histórico e retry verificados com bloqueio transitório no Chrome.
+- Duplicidade apresentou a mensagem amigável; cancelamento pendente exigiu confirmação.
+- Dashboard de água e logout conferidos. Nenhuma exceção JavaScript não tratada.
+
+Hidratação, formulário de solicitação, lista Professional e detalhe em
+1366, 1024, 768 e 375 px, sem overflow horizontal. Capturas dos quatro tamanhos
+inspecionadas; capturas adicionais de atalhos, horário, formulário e gráfico mobile.
+Gráfico contém alternativa textual; rótulos, estados e progresso não dependem só de cor.
+
+API/frontend/Chrome temporários encerrados e schema removido. Contas demo e dados reais
+preservados. Não foi adicionada suíte E2E persistente.
+
+### Problemas encontrados
+
+Imports/formatação da migration gerada e a importação da fixture compartilhada foram
+ajustados após lint. O lint final também normalizou a formatação do AppShell após a
+reordenação dos links. Um comando npm auxiliar foi iniciado na raiz (sem package.json);
+foi repetido corretamente em frontend/. Uma substituição de texto perdeu acentuação
+na passagem pelo stdin do Windows; o documento foi corrigido em UTF-8.
+
+Acesso inicial ao Docker e inspeção dos processos temporários exigiram execução fora
+do sandbox. As operações autorizadas foram concluídas. Permanece somente o aviso interno
+Starlette/AnyIO sobre BlockingPortal, sem ocultação e sem uso desse alias pelo projeto.
+
+Consulte [hydration.md](hydration.md), [reevaluations.md](reevaluations.md) e
+[dia9-relatorio.md](dia9-relatorio.md) para arquivos, decisões e limites.
+
+Checagem de encerramento: typecheck e build final aprovados após encerrar o dev de teste;
+backend e PostgreSQL locais saudáveis; /health 200; novos endpoints anônimos retornam 401.
+A chamada auxiliar inicial do smoke HTTP teve erro de aspas no PowerShell, corrigido
+com script via stdin, sem alteração na aplicação. git diff --check aprovado.
+Arquivos temporários, credenciais sintéticas e perfil de navegador removidos.

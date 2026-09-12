@@ -1,7 +1,7 @@
 # NUTRAMOVE
 
 Fundação, autenticação, gestão de profissionais e módulo Student implementados.
-Onboarding e isolamento entre profissionais incluídos. Dietas com versionamento e publicação implementadas. Treinos com versionamento e publicação implementados. IA e Evolution não implementados.
+Onboarding e isolamento entre profissionais incluídos. Dietas com versionamento e publicação implementadas. Treinos com versionamento e publicação implementados. Evolução física com avaliações, medidas e gráficos implementada. IA não implementada.
 
 - Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui e Lucide.
 - Backend: Python 3.13, FastAPI, SQLAlchemy 2.0, Pydantic e Alembic.
@@ -166,7 +166,7 @@ fica no detalhe desse profissional na área MASTER. Cadastro sem código fica se
 vínculo e é administrado apenas por MASTER. Login direciona PROFESSIONAL para
 /professional e STUDENT para /student.
 
-A migration atual é 20260910_05. Veja [Student](docs/students.md),
+A migration atual é 20260911_07. Veja [Student](docs/students.md),
 [inventário de arquivos](docs/student-files.md) e [contexto atualizado](docs/relatorio-contexto-proximos-prompts.md).
 Cadastro público e login ainda precisam de proteção contra abuso antes de exposição pública.
 
@@ -204,3 +204,23 @@ Aplique alembic upgrade head antes de utilizar o módulo.
 Professional: Meus alunos → detalhe → Treino e versões. Student: Meu treino.
 MASTER consulta sem editar. Aplique alembic upgrade head para instalar a revisão 20260910_05.
 Veja [treinos](docs/workouts.md) para modelos, endpoints, permissões, editor e validação.
+
+## Evolução física — Dia 8
+
+Professional acessa Meus alunos → aluno → Evolução para registrar e corrigir avaliações.
+Student acessa Minha evolução; MASTER consulta sem editar. Aplique alembic upgrade head
+para a revisão 20260911_06. Execute npm.cmd ci no frontend para instalar o Recharts incluído
+no lockfile. Veja [evolução](docs/evolution.md) para peso atual, IMC, endpoints e validações.
+
+
+## Hidratação e reavaliações — Dia 9
+
+Student acessa Hidratação para registrar água e Solicitar reavaliação para
+pedir uma revisão do acompanhamento. Professional consulta a hidratação no detalhe
+do aluno e atende pedidos em Reavaliações. MASTER possui consulta administrativa.
+
+Aplique `alembic upgrade head` para a revisão `20260911_07` antes de usar as rotas.
+`BUSINESS_TIMEZONE` controla o dia de hidratação (padrão America/Sao_Paulo).
+A meta permanece em litros/dia, definida pelo profissional; consumo é registrado em ml.
+Não há nova dependência nesta etapa. Consulte [hidratação](docs/hydration.md),
+[reavaliações](docs/reevaluations.md) e [relatório do Dia 9](docs/dia9-relatorio.md).
