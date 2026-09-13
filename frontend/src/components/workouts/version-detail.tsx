@@ -76,8 +76,15 @@ export function VersionDetail({ area, id }: { area: WorkoutArea; id: string }) {
       <div className="my-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium">
           Versão {data.version_number} · {workoutStatuses[data.status]} ·{" "}
-          {data.source === "MANUAL" ? "Criado manualmente" : "Origem: IA"}
+          {data.source === "MANUAL"
+            ? "Criado manualmente"
+            : "Gerado com NutraMove AI"}
         </p>
+        {data.source === "AI_GENERATED" && data.status === "PENDING_REVIEW" && (
+          <p className="text-sm">
+            Revisão profissional necessária antes da publicação.
+          </p>
+        )}
         {area === "professional" && (
           <div className="flex flex-wrap gap-3">
             {["DRAFT", "PENDING_REVIEW"].includes(data.status) && (

@@ -343,3 +343,7 @@ Informativos e notificações internas foram adicionados na revisão 20260912_08
 ## Estado complementar — Dia 11
 
 Transferência MASTER de Student e AuditLog foram adicionados na revisão 20260913_09. O vínculo atual muda; autoria de Diet/Workout/Assessment/Reevaluation não muda. Novo Professional lê histórico mas não edita registros do anterior. Plano APPROVED atual permanece para Student. IN_REVIEW bloqueia transferência; PENDING passa à operação da carteira nova. Information antiga deixa de aparecer ao Student; Notification permanece no User. Dia 12/AI não foi implementado.
+
+## Estado complementar — Dia 12
+
+NutraMove AI gera dietas e treinos como planos novos do Professional atual, com versão AI_GENERATED/PENDING_REVIEW. Provider isolado, contexto mínimo, validação Pydantic e editor/aprovação normais. Desabilitado por padrão; exige AI_ENABLED e AI_API_KEY. Não há migration, AIGeneration, chat, diagnóstico ou publicação automática. Veja nutramove-ai.md e dia12-relatorio.md.

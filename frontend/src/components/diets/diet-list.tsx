@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { AIGenerator } from "@/components/ai/ai-generator";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
 import type { DietArea, DietSummary } from "@/lib/diets";
 import { useApiResource } from "@/lib/use-api-resource";
@@ -25,12 +26,19 @@ export function DietList({
       <div className="my-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Planos alimentares</h1>
         {area === "professional" && (
-          <Link
-            href={`/professional/students/${studentId}/diets/new`}
-            className="master-primary"
-          >
-            Criar dieta
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <AIGenerator
+              kind="diet"
+              studentId={studentId}
+              onGenerated={() => void reload()}
+            />
+            <Link
+              href={`/professional/students/${studentId}/diets/new`}
+              className="master-primary"
+            >
+              Criar dieta
+            </Link>
+          </div>
         )}
       </div>
       {loading ? (

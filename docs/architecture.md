@@ -146,3 +146,7 @@ Information pertence ao Professional e pode ser geral ou individual para Student
 ## Transferência e AuditLog — Dia 11
 
 Student.professional_id representa a carteira atual. Diet, Workout, Assessment e Reevaluation preservam professional_id histórico. Repositories de planos e avaliações permitem leitura do histórico pela carteira atual, enquanto mutações exigem autoria do Professional atual. Transferência bloqueia a linha Student, compara expected_professional_id e grava AuditLog no mesmo commit. IN_REVIEW impede transferência; PENDING passa à carteira nova. Information continua associada ao Professional original e Notification ao User. A migration 20260913_09 adiciona apenas audit_logs. Veja [student-transfers.md](student-transfers.md) e [audit-log.md](audit-log.md).
+
+## NutraMove AI — Dia 12
+
+A fronteira pp/ai/provider.py chama a Responses API; generation.py monta contexto mínimo e cria Diet/Workout novos com versões AI_GENERATED/PENDING_REVIEW. O editor, a aprovação e Notification existentes continuam responsáveis pela publicação. Sem nova tabela ou migration. Veja [nutramove-ai.md](nutramove-ai.md).

@@ -4,7 +4,7 @@ from typing import Literal, Self
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field, PostgresDsn, field_validator, model_validator
+from pydantic import Field, PostgresDsn, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     session_seconds: int = Field(default=3600, ge=300, le=604800)
     cookie_secure: bool = False
     business_timezone: str = "America/Sao_Paulo"
+    ai_enabled: bool = False
+    ai_model: str = "gpt-4o-mini"
+    ai_api_key: SecretStr | None = None
+    ai_timeout_seconds: int = Field(default=45, ge=5, le=120)
 
     @field_validator("business_timezone")
     @classmethod

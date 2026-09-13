@@ -278,3 +278,13 @@ Backend: 373 testes passaram, nenhum pulado; Ruff check e format --check aprovad
 ## Validação final do Dia 11 — transferência e auditoria
 
 390 testes passaram, nenhum pulado (17 novos); PostgreSQL em schemas isolados testou upgrade/downgrade/upgrade/check e concorrência com duas conexões. Ruff check/format, mypy strict (109 arquivos), pip check, Biome (130 arquivos), TypeScript e build Next.js passaram. Compose config e Docker build aprovados. Alembic local: 20260913_09 (head), check sem operações novas. Backend local atualizado: /health 200, audit-logs anônimo 401. Permanece aviso Starlette/AnyIO. Não houve validação visual ou automação de navegador nesta execução; larguras 1366/1024/768/375 px não foram confirmadas visualmente. Veja dia11-relatorio.md.
+
+## Dia 12 — NutraMove AI
+
+- Branch inicial develop limpa; Alembic heads/current 20260913_09, sem migration nova; alembic check sem operações.
+- pytest backend/tests/test_ai.py -q -p no:cacheprovider: 7 passaram, fake provider, PostgreSQL temporário.
+- pytest backend/tests -q -p no:cacheprovider: 397 passaram, nenhum pulado (1 aviso Starlette/AnyIO).
+- Ruff check/format, mypy strict (116 arquivos), pip check: aprovados.
+- Biome (131 arquivos), TypeScript e Next build: aprovados. Build final usou distDir temporário devido EPERM no cache .next do OneDrive, depois config e cache temporários restaurados/removidos.
+- Compose config --quiet, Docker build backend e Alembic check: aprovados.
+- Sem chamada paga, sem inspeção visual/browser real ou smoke visual dos Dias 10/11 nesta execução.

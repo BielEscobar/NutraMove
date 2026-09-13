@@ -1,7 +1,7 @@
 # NUTRAMOVE
 
 Fundação, autenticação, gestão de profissionais e módulo Student implementados.
-Onboarding e isolamento entre profissionais incluídos. Dietas com versionamento e publicação implementadas. Treinos com versionamento e publicação implementados. Evolução física com avaliações, medidas e gráficos implementada. IA não implementada.
+Onboarding e isolamento entre profissionais incluídos. Dietas com versionamento e publicação implementadas. Treinos com versionamento e publicação implementados. Evolução física com avaliações, medidas e gráficos implementada. NutraMove AI gera sugestões de dieta/treino pendentes de revisão profissional.
 
 - Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui e Lucide.
 - Backend: Python 3.13, FastAPI, SQLAlchemy 2.0, Pydantic e Alembic.
@@ -232,3 +232,7 @@ Professional publica informativos para toda a carteira ou um aluno próprio. Stu
 ## Transferência de alunos e auditoria — Dia 11
 
 MASTER transfere ou atribui Student pelo detalhe do aluno. O vínculo muda sem reatribuir histórico; AuditLog registra ator, origem, destino e motivo na mesma transação. Aplique `alembic upgrade head` para a revisão `20260913_09`. Veja [transferências](docs/student-transfers.md) e [auditoria](docs/audit-log.md).
+
+## NutraMove AI — Dia 12
+
+Professional pode gerar sugestões de dieta e treino para alunos ativos da própria carteira. A versão nasce AI_GENERATED/PENDING_REVIEW, é editada e aprovada no fluxo normal. Configure AI_ENABLED e AI_API_KEY no backend/Compose para habilitar. Consulte [NutraMove AI](docs/nutramove-ai.md).

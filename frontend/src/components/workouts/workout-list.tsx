@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { AIGenerator } from "@/components/ai/ai-generator";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
 import { useApiResource } from "@/lib/use-api-resource";
 import type { WorkoutArea, WorkoutSummary } from "@/lib/workouts";
@@ -25,12 +26,19 @@ export function WorkoutList({
       <div className="my-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Planos de treino</h1>
         {area === "professional" && (
-          <Link
-            href={`/professional/students/${studentId}/workouts/new`}
-            className="master-primary"
-          >
-            Criar treino
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <AIGenerator
+              kind="workout"
+              studentId={studentId}
+              onGenerated={() => void reload()}
+            />
+            <Link
+              href={`/professional/students/${studentId}/workouts/new`}
+              className="master-primary"
+            >
+              Criar treino
+            </Link>
+          </div>
         )}
       </div>
       {loading ? (

@@ -24,6 +24,10 @@ services:
       APP_NAME: NUTRAMOVE API
       ENVIRONMENT: development
       BUSINESS_TIMEZONE: ${BUSINESS_TIMEZONE:-America/Sao_Paulo}
+      AI_ENABLED: ${AI_ENABLED:-false}
+      AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-45}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-nutramove}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@db:5432/${POSTGRES_DB:-nutramove}
       CORS_ORIGINS: '["http://localhost:3000"]'
     ports:
