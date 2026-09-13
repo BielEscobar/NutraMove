@@ -224,3 +224,7 @@ Aplique `alembic upgrade head` para a revisão `20260911_07` antes de usar as ro
 A meta permanece em litros/dia, definida pelo profissional; consumo é registrado em ml.
 Não há nova dependência nesta etapa. Consulte [hidratação](docs/hydration.md),
 [reavaliações](docs/reevaluations.md) e [relatório do Dia 9](docs/dia9-relatorio.md).
+
+## Informativos e notificações internas — Dia 10
+
+Professional publica informativos para toda a carteira ou um aluno próprio. Student lê apenas publicações destinadas a ele; MASTER consulta. O sino no AppShell abre a inbox privada de notificações do User. Aplique `alembic upgrade head` para a revisão `20260912_08`. Consulte [informativos](docs/informations.md) e [notificações](docs/notifications.md).

@@ -8,10 +8,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import StudentStatus, User, UserRole
+from app.models.notification import NotificationType
 from app.models.reevaluation import ReevaluationRequest
 from app.models.reevaluation import ReevaluationStatus as Status
 from app.repositories import reevaluations
 from app.schemas.reevaluation import ReevaluationCreate
+from app.services.notifications import add as notify
 from app.services.students import get
 
 Action = Literal["start-review", "complete", "cancel"]
@@ -42,6 +44,8 @@ def create(db: Session, actor: User, data: ReevaluationCreate) -> ReevaluationRe
     )
     try:
         db.add(record)
+        db.flush()
+        notify(db, owner.professional.user_id, NotificationType.REEVALUATION_CREATED, record.id)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -81,5 +85,13 @@ def transition(
         record.cancelled_at = now
         record.cancelled_by_user_id = actor.id
     record.updated_at = now
+    if actor.role == UserRole.PROFESSIONAL:
+        owner = get(db, actor, record.student_id)
+        kinds = {
+            "start-review": NotificationType.REEVALUATION_IN_REVIEW,
+            "complete": NotificationType.REEVALUATION_COMPLETED,
+            "cancel": NotificationType.REEVALUATION_CANCELLED,
+        }
+        notify(db, owner.user_id, kinds[action], record.id)
     db.commit()
     return record

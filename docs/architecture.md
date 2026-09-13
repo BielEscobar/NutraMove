@@ -138,3 +138,7 @@ e reevaluations reutilizam AppShell, useApiResource, cliente HTTP e Recharts.
 Migration 20260911_07 cria as duas tabelas sem modificar revisões anteriores.
 Veja [hydration.md](hydration.md), [reevaluations.md](reevaluations.md) e
 [dia9-relatorio.md](dia9-relatorio.md). Não há notificações, AI ou novas dependências.
+
+## Informativos e notificações — Dia 10
+
+Information pertence ao Professional e pode ser geral ou individual para Student próprio. O estado DRAFT/PUBLISHED/ARCHIVED separa edição e leitura do aluno. Notification pertence ao User, com texto curto, evento controlado, recurso tipado e read_at. Services emitem eventos na mesma transação da mutação; publicação geral usa INSERT SELECT para Students ACTIVE. Repositories aplicam ownership e paginação. AppShell compartilha o sino; telas por perfil compartilham componentes de informativos. Migration 20260912_08 adiciona as tabelas. Veja [informations.md](informations.md) e [notifications.md](notifications.md).

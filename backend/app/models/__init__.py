@@ -2,6 +2,8 @@ from app.models.assessment import Assessment, Measurement
 from app.models.auth_session import AuthSession
 from app.models.diet import Diet, DietVersion, Food, FoodSubstitution, Meal
 from app.models.hydration import WaterRecord
+from app.models.information import Information
+from app.models.notification import Notification
 from app.models.professional import Professional
 from app.models.reevaluation import ReevaluationRequest
 from app.models.student import Student, StudentStatus
@@ -9,6 +11,8 @@ from app.models.user import User, UserRole
 from app.models.workout import Workout, WorkoutDay, WorkoutExercise, WorkoutVersion
 
 __all__ = [
+    "Information",
+    "Notification",
     "WaterRecord",
     "ReevaluationRequest",
     "Assessment",

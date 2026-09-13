@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.models import User, UserRole
+from app.models.notification import NotificationType
 from app.models.student import Student, StudentStatus
 from app.repositories import auth_sessions, professionals, students, users
 from app.repositories.assessments import latest_weight
@@ -19,6 +20,7 @@ from app.schemas.student import (
     StudentResponse,
     StudentUpdate,
 )
+from app.services.notifications import add as notify
 
 StudentAction = Literal["approve", "reject", "activate", "deactivate"]
 
@@ -55,6 +57,7 @@ def response(student: Student) -> StudentResponse:
 def create(db: Session, data: StudentCreate) -> Student:
     if users.get_by_email(db, str(data.email)):
         raise HTTPException(409, "E-mail já cadastrado.")
+    professional = None
     if data.professional_id is not None:
         professional = professionals.get_by_id(db, data.professional_id, lock=True)
         if professional is None or not professional.user.is_active:
@@ -75,6 +78,9 @@ def create(db: Session, data: StudentCreate) -> Student:
     )
     try:
         db.add(student)
+        db.flush()
+        if professional is not None:
+            notify(db, professional.user_id, NotificationType.STUDENT_PENDING_APPROVAL, student.id)
         db.commit()
     except IntegrityError:
         db.rollback()

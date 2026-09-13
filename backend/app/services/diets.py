@@ -8,8 +8,10 @@ from sqlalchemy.orm import Session
 
 from app.models import StudentStatus, User
 from app.models.diet import Diet, DietSource, DietStatus, DietVersion, Food, FoodSubstitution, Meal
+from app.models.notification import NotificationType
 from app.repositories import diets
 from app.schemas.diet import VersionContent, VersionUpdate
+from app.services.notifications import add as notify
 from app.services.students import get as get_student
 
 
@@ -163,5 +165,6 @@ def approve(db: Session, actor: User, version_id: UUID, expected_revision: int) 
     version.approved_at = now
     version.updated_at = now
     version.edit_revision += 1
+    notify(db, student.user_id, NotificationType.DIET_UPDATED, version.id)
     commit(db)
     return version

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import hydration, reevaluations
+from app.api import hydration, informations, notifications, reevaluations
 from app.api.assessments import master_router as master_assessments_router
 from app.api.assessments import professional_router as professional_assessments_router
 from app.api.assessments import student_router as student_assessments_router
@@ -55,7 +55,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(professional_assessments_router)
     app.include_router(master_assessments_router)
     app.include_router(student_assessments_router)
-    for module in (hydration, reevaluations):
+    app.include_router(notifications.router)
+    for module in (hydration, reevaluations, informations):
         app.include_router(module.student_router)
         app.include_router(module.professional_router)
         app.include_router(module.master_router)

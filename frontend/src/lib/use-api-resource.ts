@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, apiRequest } from "@/lib/api";
 
-export function useApiResource<T>(path: string) {
+export function useApiResource<T>(path: string | null) {
   const router = useRouter();
   const controller = useRef<AbortController | null>(null);
   const [data, setData] = useState<T | null>(null);
@@ -12,6 +12,10 @@ export function useApiResource<T>(path: string) {
   const [error, setError] = useState("");
 
   const reload = useCallback(async () => {
+    if (path === null) {
+      setLoading(false);
+      return;
+    }
     controller.current?.abort();
     const request = new AbortController();
     controller.current = request;

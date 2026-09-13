@@ -7,6 +7,7 @@ import {
   Leaf,
   LogOut,
   MessageSquare,
+  Newspaper,
   TrendingUp,
   UserRound,
   UsersRound,
@@ -15,6 +16,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { apiRequest, type User } from "@/lib/api";
 import { homeForRole } from "@/lib/students";
 import { useApiResource } from "@/lib/use-api-resource";
@@ -24,6 +26,7 @@ const navigation = {
     { href: "/master", label: "Dashboard", icon: LayoutDashboard },
     { href: "/master/professionals", label: "Profissionais", icon: UsersRound },
     { href: "/master/students", label: "Alunos", icon: UserRound },
+    { href: "/master/informations", label: "Informativos", icon: Newspaper },
     {
       href: "/master/reevaluation-requests",
       label: "Reavaliações",
@@ -33,6 +36,11 @@ const navigation = {
   PROFESSIONAL: [
     { href: "/professional", label: "Dashboard", icon: LayoutDashboard },
     { href: "/professional/students", label: "Meus alunos", icon: UsersRound },
+    {
+      href: "/professional/informations",
+      label: "Informativos",
+      icon: Newspaper,
+    },
     {
       href: "/professional/reevaluation-requests",
       label: "Reavaliações",
@@ -46,6 +54,7 @@ const navigation = {
     { href: "/student/workout", label: "Meu treino", icon: Dumbbell },
     { href: "/student/evolution", label: "Minha evolução", icon: TrendingUp },
     { href: "/student/hydration", label: "Hidratação", icon: Droplets },
+    { href: "/student/informations", label: "Informativos", icon: Newspaper },
     {
       href: "/student/reevaluation-requests",
       label: "Solicitar reavaliação",
@@ -63,7 +72,7 @@ export function AppShell({
   allowedRole,
   children,
 }: {
-  allowedRole: User["role"];
+  allowedRole?: User["role"];
   children: ReactNode;
 }) {
   const {
@@ -78,7 +87,7 @@ export function AppShell({
   const [leaving, setLeaving] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   useEffect(() => {
-    if (user && user.role !== allowedRole)
+    if (user && allowedRole && user.role !== allowedRole)
       router.replace(homeForRole(user.role));
   }, [user, allowedRole, router]);
   async function logout() {
@@ -109,7 +118,7 @@ export function AppShell({
         <ErrorState message={error} retry={reload} />
       </main>
     );
-  if (user?.role !== allowedRole)
+  if (!user || (allowedRole && user.role !== allowedRole))
     return (
       <main className="p-8">
         <LoadingState />
@@ -170,6 +179,7 @@ export function AppShell({
               Minha conta
             </Link>
           </div>
+          <NotificationBell />
           <button
             type="button"
             disabled={leaving}

@@ -335,3 +335,7 @@ Validação final Dia 8: Biome 97 arquivos, TypeScript e build Next.js aprovados
 real validou duas avaliações, correção, gráficos/tooltip, perfis e quatro larguras sem overflow.
 Capturas inspecionadas; dados temporários removidos. Build EPERM de .next resolvido com
 limpeza somente dos artefatos gerados após encerrar o dev. Veja evolution.md e validation.md.
+
+## Estado complementar — Dia 10
+
+Informativos e notificações internas foram adicionados na revisão 20260912_08. Information tem audiência geral ou individual e estados DRAFT/PUBLISHED/ARCHIVED. Notification pertence a User e eventos são transacionais. Acesso a informativos de carteira anterior e links de notificações após transferência exigem política explícita no Dia 11. Não há IA, push, e-mail, cron ou transferência implementados neste Dia.

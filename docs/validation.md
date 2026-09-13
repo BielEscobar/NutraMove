@@ -270,3 +270,7 @@ backend e PostgreSQL locais saudáveis; /health 200; novos endpoints anônimos r
 A chamada auxiliar inicial do smoke HTTP teve erro de aspas no PowerShell, corrigido
 com script via stdin, sem alteração na aplicação. git diff --check aprovado.
 Arquivos temporários, credenciais sintéticas e perfil de navegador removidos.
+
+## Verificação do Dia 10 — informativos e notificações
+
+Backend: 373 testes passaram, nenhum pulado; Ruff check e format --check aprovados; mypy strict aprovado em 102 arquivos; pip check sem incompatibilidades. Frontend: Biome aprovado em 127 arquivos, TypeScript e build Next.js aprovados. Compose config --quiet aprovado. Alembic local: 20260912_08 (head), check sem operações novas; upgrade/downgrade/upgrade em schemas de testes. Docker build aprovado. Não houve validação de navegador ou inspeção visual nesta execução. Permanece um DeprecationWarning interno Starlette/AnyIO.
