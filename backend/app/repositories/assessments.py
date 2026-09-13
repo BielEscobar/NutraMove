@@ -35,10 +35,6 @@ def scope(db: Session, actor: User) -> Select[tuple[Assessment]]:
     query = select(Assessment).where(
         Assessment.student_id.in_(scoped_query(db, actor).with_only_columns(Student.id))
     )
-    if actor.role == UserRole.PROFESSIONAL:
-        query = query.join(Student, Student.id == Assessment.student_id).where(
-            Assessment.professional_id == Student.professional_id
-        )
     return query
 
 
@@ -52,7 +48,9 @@ def detail(db: Session, actor: User, assessment_id: UUID, *, lock: bool = False)
     if result is None:
         raise HTTPException(404, "Avaliação não encontrada.")
     if lock:
-        student(db, actor, result.student_id, lock=True)
+        owner = student(db, actor, result.student_id, lock=True)
+        if actor.role == UserRole.PROFESSIONAL and result.professional_id != owner.professional_id:
+            raise HTTPException(404, "Avaliação não encontrada.")
         result = db.scalar(
             query.with_for_update(of=Assessment).execution_options(populate_existing=True)
         )

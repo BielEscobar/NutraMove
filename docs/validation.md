@@ -274,3 +274,7 @@ Arquivos temporários, credenciais sintéticas e perfil de navegador removidos.
 ## Verificação do Dia 10 — informativos e notificações
 
 Backend: 373 testes passaram, nenhum pulado; Ruff check e format --check aprovados; mypy strict aprovado em 102 arquivos; pip check sem incompatibilidades. Frontend: Biome aprovado em 127 arquivos, TypeScript e build Next.js aprovados. Compose config --quiet aprovado. Alembic local: 20260912_08 (head), check sem operações novas; upgrade/downgrade/upgrade em schemas de testes. Docker build aprovado. Não houve validação de navegador ou inspeção visual nesta execução. Permanece um DeprecationWarning interno Starlette/AnyIO.
+
+## Validação final do Dia 11 — transferência e auditoria
+
+390 testes passaram, nenhum pulado (17 novos); PostgreSQL em schemas isolados testou upgrade/downgrade/upgrade/check e concorrência com duas conexões. Ruff check/format, mypy strict (109 arquivos), pip check, Biome (130 arquivos), TypeScript e build Next.js passaram. Compose config e Docker build aprovados. Alembic local: 20260913_09 (head), check sem operações novas. Backend local atualizado: /health 200, audit-logs anônimo 401. Permanece aviso Starlette/AnyIO. Não houve validação visual ou automação de navegador nesta execução; larguras 1366/1024/768/375 px não foram confirmadas visualmente. Veja dia11-relatorio.md.

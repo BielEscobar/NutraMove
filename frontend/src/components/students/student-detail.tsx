@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useRef, useState } from "react";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
+import { StudentTransferPanel } from "@/components/transfers/student-transfer-panel";
 import { ApiError, apiRequest } from "@/lib/api";
 import { type Student, type StudentArea, statuses } from "@/lib/students";
 import { useApiResource } from "@/lib/use-api-resource";
@@ -221,6 +222,15 @@ export function StudentDetail({ area, id }: { area: StudentArea; id: string }) {
               Profissional:{" "}
               {data.professional_name || "Sem profissional atribuído"}
             </p>
+            {area === "master" && (
+              <StudentTransferPanel
+                student={data}
+                transferred={() => {
+                  setSuccess("Aluno transferido com sucesso.");
+                  void reload();
+                }}
+              />
+            )}
             {editing ? (
               <Editor
                 key={data.id}

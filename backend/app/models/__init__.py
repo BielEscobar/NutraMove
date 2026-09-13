@@ -1,4 +1,5 @@
 from app.models.assessment import Assessment, Measurement
+from app.models.audit_log import AuditLog
 from app.models.auth_session import AuthSession
 from app.models.diet import Diet, DietVersion, Food, FoodSubstitution, Meal
 from app.models.hydration import WaterRecord
@@ -11,6 +12,7 @@ from app.models.user import User, UserRole
 from app.models.workout import Workout, WorkoutDay, WorkoutExercise, WorkoutVersion
 
 __all__ = [
+    "AuditLog",
     "Information",
     "Notification",
     "WaterRecord",

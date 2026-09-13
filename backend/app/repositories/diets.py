@@ -13,10 +13,6 @@ from app.repositories.students import scoped_query
 def diet_scope(db: Session, actor: User) -> Select[tuple[Diet]]:
     student_ids = scoped_query(db, actor).with_only_columns(Student.id)
     query = select(Diet).where(Diet.student_id.in_(student_ids))
-    if actor.role == UserRole.PROFESSIONAL:
-        query = query.join(Student, Student.id == Diet.student_id).where(
-            Diet.professional_id == Student.professional_id
-        )
     return query
 
 
@@ -27,7 +23,9 @@ def get_diet(db: Session, actor: User, diet_id: UUID, *, lock: bool = False) -> 
         raise HTTPException(404, "Dieta não encontrada.")
     if lock:
         # All writes lock Student first, then Diet: publication across plans is serialized.
-        get_student(db, actor, diet.student_id, lock=True)
+        owner = get_student(db, actor, diet.student_id, lock=True)
+        if actor.role == UserRole.PROFESSIONAL and diet.professional_id != owner.professional_id:
+            raise HTTPException(404, "Dieta não encontrada.")
         diet = db.scalar(query.with_for_update(of=Diet).execution_options(populate_existing=True))
         if diet is None:
             raise HTTPException(404, "Dieta não encontrada.")

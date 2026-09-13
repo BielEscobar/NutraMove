@@ -339,3 +339,7 @@ limpeza somente dos artefatos gerados após encerrar o dev. Veja evolution.md e 
 ## Estado complementar — Dia 10
 
 Informativos e notificações internas foram adicionados na revisão 20260912_08. Information tem audiência geral ou individual e estados DRAFT/PUBLISHED/ARCHIVED. Notification pertence a User e eventos são transacionais. Acesso a informativos de carteira anterior e links de notificações após transferência exigem política explícita no Dia 11. Não há IA, push, e-mail, cron ou transferência implementados neste Dia.
+
+## Estado complementar — Dia 11
+
+Transferência MASTER de Student e AuditLog foram adicionados na revisão 20260913_09. O vínculo atual muda; autoria de Diet/Workout/Assessment/Reevaluation não muda. Novo Professional lê histórico mas não edita registros do anterior. Plano APPROVED atual permanece para Student. IN_REVIEW bloqueia transferência; PENDING passa à operação da carteira nova. Information antiga deixa de aparecer ao Student; Notification permanece no User. Dia 12/AI não foi implementado.

@@ -228,3 +228,7 @@ Não há nova dependência nesta etapa. Consulte [hidratação](docs/hydration.m
 ## Informativos e notificações internas — Dia 10
 
 Professional publica informativos para toda a carteira ou um aluno próprio. Student lê apenas publicações destinadas a ele; MASTER consulta. O sino no AppShell abre a inbox privada de notificações do User. Aplique `alembic upgrade head` para a revisão `20260912_08`. Consulte [informativos](docs/informations.md) e [notificações](docs/notifications.md).
+
+## Transferência de alunos e auditoria — Dia 11
+
+MASTER transfere ou atribui Student pelo detalhe do aluno. O vínculo muda sem reatribuir histórico; AuditLog registra ator, origem, destino e motivo na mesma transação. Aplique `alembic upgrade head` para a revisão `20260913_09`. Veja [transferências](docs/student-transfers.md) e [auditoria](docs/audit-log.md).

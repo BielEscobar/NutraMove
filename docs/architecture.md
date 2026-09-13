@@ -142,3 +142,7 @@ Veja [hydration.md](hydration.md), [reevaluations.md](reevaluations.md) e
 ## Informativos e notificações — Dia 10
 
 Information pertence ao Professional e pode ser geral ou individual para Student próprio. O estado DRAFT/PUBLISHED/ARCHIVED separa edição e leitura do aluno. Notification pertence ao User, com texto curto, evento controlado, recurso tipado e read_at. Services emitem eventos na mesma transação da mutação; publicação geral usa INSERT SELECT para Students ACTIVE. Repositories aplicam ownership e paginação. AppShell compartilha o sino; telas por perfil compartilham componentes de informativos. Migration 20260912_08 adiciona as tabelas. Veja [informations.md](informations.md) e [notifications.md](notifications.md).
+
+## Transferência e AuditLog — Dia 11
+
+Student.professional_id representa a carteira atual. Diet, Workout, Assessment e Reevaluation preservam professional_id histórico. Repositories de planos e avaliações permitem leitura do histórico pela carteira atual, enquanto mutações exigem autoria do Professional atual. Transferência bloqueia a linha Student, compara expected_professional_id e grava AuditLog no mesmo commit. IN_REVIEW impede transferência; PENDING passa à carteira nova. Information continua associada ao Professional original e Notification ao User. A migration 20260913_09 adiciona apenas audit_logs. Veja [student-transfers.md](student-transfers.md) e [audit-log.md](audit-log.md).

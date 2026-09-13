@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ClipboardList,
   Droplets,
   Dumbbell,
   LayoutDashboard,
@@ -27,6 +28,7 @@ const navigation = {
     { href: "/master/professionals", label: "Profissionais", icon: UsersRound },
     { href: "/master/students", label: "Alunos", icon: UserRound },
     { href: "/master/informations", label: "Informativos", icon: Newspaper },
+    { href: "/master/audit-logs", label: "Auditoria", icon: ClipboardList },
     {
       href: "/master/reevaluation-requests",
       label: "Reavaliações",

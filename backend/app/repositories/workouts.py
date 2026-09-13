@@ -13,10 +13,6 @@ from app.repositories.students import scoped_query
 def workout_scope(db: Session, actor: User) -> Select[tuple[Workout]]:
     student_ids = scoped_query(db, actor).with_only_columns(Student.id)
     query = select(Workout).where(Workout.student_id.in_(student_ids))
-    if actor.role == UserRole.PROFESSIONAL:
-        query = query.join(Student, Student.id == Workout.student_id).where(
-            Workout.professional_id == Student.professional_id
-        )
     return query
 
 
@@ -27,7 +23,9 @@ def get_workout(db: Session, actor: User, workout_id: UUID, *, lock: bool = Fals
         raise HTTPException(404, "Treino não encontrado.")
     if lock:
         # All writes lock Student first, then Workout: publication across plans is serialized.
-        get_student(db, actor, workout.student_id, lock=True)
+        owner = get_student(db, actor, workout.student_id, lock=True)
+        if actor.role == UserRole.PROFESSIONAL and workout.professional_id != owner.professional_id:
+            raise HTTPException(404, "Treino não encontrado.")
         workout = db.scalar(
             query.with_for_update(of=Workout).execution_options(populate_existing=True)
         )

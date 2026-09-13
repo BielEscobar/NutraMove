@@ -1,0 +1,9 @@
+# Transferência de alunos — Dia 11
+
+Somente MASTER usa `POST /master/students/{id}/transfer`. O corpo exige `new_professional_id`, `expected_professional_id` (obrigatório mesmo quando null) e motivo administrativo de 5 a 500 caracteres. O backend bloqueia a linha Student, compara o vínculo esperado, valida destino com User Professional ativo e grava novo vínculo e AuditLog na mesma transação. Estado obsoleto retorna 409. O teste com duas conexões simultâneas obtém uma transferência e um conflito, com um único AuditLog.
+
+PENDING_APPROVAL, ACTIVE e INACTIVE podem ser atribuídos/transferidos sem mudança de status. REJECTED é bloqueado. Student sem Professional usa o mesmo endpoint com expected null. Não há remoção de vínculo. Reevaluation IN_REVIEW bloqueia transferência; PENDING passa à operação da carteira nova, preservando destinatário histórico. COMPLETED/CANCELLED permanecem históricos.
+
+Professional antigo perde imediatamente acesso às rotas da carteira. Professional novo lê Diet, Workout e Assessment históricos do Student, mas mutações exigem autoria do Professional atual; para prescrever cria novos planos próprios. Planos APPROVED atuais continuam visíveis ao Student até substituição. Assessment histórico preserva professional_id e novo Professional pode criar outro. WaterRecord permanece do Student e acompanha a carteira. Information geral/individual do Professional anterior deixa de aparecer ao Student após troca, sem exclusão ou reatribuição. Notification permanece no User; link a recurso antigo pode resultar em 404 seguro.
+
+Nenhum registro histórico recebe UPDATE em professional_id. Dashboard deriva contagens do vínculo Student atual. Não foi adicionada Notification de transferência: a prioridade V1 foi a auditoria transacional, sem novo tipo/alteração de enum.
