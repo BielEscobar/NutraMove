@@ -45,6 +45,7 @@ export async function apiRequest<T>(
           ? "E-mail já cadastrado. Informe outro e-mail."
           : "A situação do cadastro não permite esta ação. Atualize os dados.",
       422: "Revise os campos informados e tente novamente.",
+      429: "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
     };
     if (response.status === 409 && path.includes("/reevaluation-requests")) {
       const body: unknown = await response.json().catch(() => null);

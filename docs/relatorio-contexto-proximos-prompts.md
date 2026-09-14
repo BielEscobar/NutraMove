@@ -347,3 +347,7 @@ Transferência MASTER de Student e AuditLog foram adicionados na revisão 202609
 ## Estado complementar — Dia 12
 
 NutraMove AI gera dietas e treinos como planos novos do Professional atual, com versão AI_GENERATED/PENDING_REVIEW. Provider isolado, contexto mínimo, validação Pydantic e editor/aprovação normais. Desabilitado por padrão; exige AI_ENABLED e AI_API_KEY. Não há migration, AIGeneration, chat, diagnóstico ou publicação automática. Veja nutramove-ai.md e dia12-relatorio.md.
+
+## Estado complementar — Dia 13
+
+Hardening sem nova feature de negócio: limite PostgreSQL em login/cadastro/IA (migration 20260913_10), security headers, no-store em toda a API, docs configuráveis e validações de produção. Inventário LGPD, matriz de segurança e checklist de produção em privacy-lgpd.md, security.md e production-checklist.md. Dia 14 permanece deploy/infra não implementado. O código real e o relatório dia13-relatorio.md prevalecem sobre este resumo.

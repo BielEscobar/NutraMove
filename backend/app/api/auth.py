@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
 
 from app.api.dependencies import AppSettings, CurrentUser, DbSession, require_trusted_origin
+from app.core.rate_limit import consume
 from app.schemas.auth import LoginRequest, UserResponse
 from app.services import auth
 
@@ -11,6 +12,14 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def login(
     data: LoginRequest, request: Request, response: Response, db: DbSession, settings: AppSettings
 ) -> UserResponse:
+    consume(
+        db,
+        settings,
+        "login",
+        request.client.host if request.client else "unknown",
+        limit=10,
+        period_seconds=300,
+    )
     user, token = auth.login(
         db, data, settings.session_seconds, request.cookies.get(settings.session_cookie_name)
     )

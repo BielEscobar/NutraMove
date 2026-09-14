@@ -1,3 +1,4 @@
+import secrets
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Self
@@ -28,6 +29,10 @@ class Settings(BaseSettings):
     ai_model: str = "gpt-4o-mini"
     ai_api_key: SecretStr | None = None
     ai_timeout_seconds: int = Field(default=45, ge=5, le=120)
+    rate_limit_secret: SecretStr = Field(
+        default_factory=lambda: SecretStr(secrets.token_urlsafe(32))
+    )
+    docs_enabled: bool | None = None
 
     @field_validator("business_timezone")
     @classmethod
@@ -37,6 +42,12 @@ class Settings(BaseSettings):
         except (ZoneInfoNotFoundError, ValueError):
             raise ValueError("Use a valid IANA timezone.") from None
         return value
+
+    @property
+    def docs_available(self) -> bool:
+        return (
+            self.docs_enabled if self.docs_enabled is not None else self.environment != "production"
+        )
 
     @property
     def session_cookie_name(self) -> str:
@@ -80,6 +91,20 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "Production requires COOKIE_SECURE=true and HTTPS frontend origins."
                 )
+            if any(
+                urlsplit(origin).hostname in {"localhost", "127.0.0.1", "::1"}
+                for origin in self.cors_origins
+            ):
+                raise ValueError("Production CORS origins cannot be loopback hosts.")
+            if (
+                "rate_limit_secret" not in self.model_fields_set
+                or len(self.rate_limit_secret.get_secret_value()) < 32
+            ):
+                raise ValueError(
+                    "Production requires an explicit RATE_LIMIT_SECRET of at least 32 characters."
+                )
+            if self.ai_enabled and not self.ai_api_key:
+                raise ValueError("AI_ENABLED requires AI_API_KEY in production.")
         return self
 
 

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.api.ai import get_ai_provider
 from app.core.config import get_settings
+from app.core.rate_limit import consume
 from app.core.security import hash_password
 from app.models import Professional, Student, StudentStatus, User, UserRole
 from app.models.diet import Diet
@@ -212,3 +213,19 @@ def test_medical_output_rejected() -> None:
     with pytest.raises(ValueError):
         validate_scope({"notes": "Prescrever hormônio para o aluno"})
     validate_scope({"notes": "Revisar com o profissional"})
+
+
+def test_ai_rate_limit(
+    client: TestClient,
+    db: Session,
+    app: FastAPI,
+    setup_ai: tuple[Professional, Professional, Student, Student, FakeProvider],
+) -> None:
+    owner, _, student, _, fake = setup_ai
+    settings = app.dependency_overrides[get_settings]()
+    for _ in range(10):
+        consume(db, settings, "ai", str(owner.user_id), limit=10, period_seconds=3600)
+    login(client, owner.user.email)
+    response = client.post(f"/professional/students/{student.id}/ai/diet", headers=ORIGIN, json={})
+    assert response.status_code == 429
+    assert not fake.contexts

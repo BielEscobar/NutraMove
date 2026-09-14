@@ -20,6 +20,7 @@ from app.api.workouts import professional_router as professional_workouts_router
 from app.api.workouts import student_router as student_workouts_router
 from app.core.config import Settings, get_settings
 from app.core.errors import SafeErrorMiddleware, register_error_handlers
+from app.core.headers import SecurityHeadersMiddleware
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -28,7 +29,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def configured_settings() -> Settings:
         return settings
 
-    app = FastAPI(title=settings.app_name, debug=False)
+    app = FastAPI(
+        title=settings.app_name,
+        debug=False,
+        docs_url="/docs" if settings.docs_available else None,
+        redoc_url="/redoc" if settings.docs_available else None,
+        openapi_url="/openapi.json" if settings.docs_available else None,
+    )
     app.dependency_overrides[get_settings] = configured_settings
     app.add_middleware(SafeErrorMiddleware)
     app.add_middleware(
@@ -38,6 +45,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["GET", "POST", "PATCH"],
         allow_headers=["Content-Type"],
     )
+    app.add_middleware(SecurityHeadersMiddleware, production=settings.environment == "production")
     register_error_handlers(app)
     app.include_router(health_router)
     app.include_router(auth_router)

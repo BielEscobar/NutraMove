@@ -1,10 +1,17 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 
-from app.api.dependencies import CurrentUser, DbSession, require_roles, require_trusted_origin
+from app.api.dependencies import (
+    AppSettings,
+    CurrentUser,
+    DbSession,
+    require_roles,
+    require_trusted_origin,
+)
 from app.api.professionals import no_cache
+from app.core.rate_limit import consume
 from app.models import UserRole
 from app.repositories import students
 from app.schemas.student import (
@@ -37,7 +44,17 @@ professional_router = APIRouter(
     response_model=StudentRegistrationResponse,
     dependencies=[Depends(require_trusted_origin)],
 )
-def register(data: StudentCreate, db: DbSession) -> StudentRegistrationResponse:
+def register(
+    data: StudentCreate, request: Request, db: DbSession, settings: AppSettings
+) -> StudentRegistrationResponse:
+    consume(
+        db,
+        settings,
+        "register",
+        request.client.host if request.client else "unknown",
+        limit=5,
+        period_seconds=3600,
+    )
     student = service.create(db, data)
     return StudentRegistrationResponse(status=student.status)
 

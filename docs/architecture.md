@@ -150,3 +150,7 @@ Student.professional_id representa a carteira atual. Diet, Workout, Assessment e
 ## NutraMove AI — Dia 12
 
 A fronteira pp/ai/provider.py chama a Responses API; generation.py monta contexto mínimo e cria Diet/Workout novos com versões AI_GENERATED/PENDING_REVIEW. O editor, a aprovação e Notification existentes continuam responsáveis pela publicação. Sem nova tabela ou migration. Veja [nutramove-ai.md](nutramove-ai.md).
+
+## Hardening — Dia 13
+
+`core/rate_limit.py` usa `rate_limit_windows` no PostgreSQL, HMAC de identidade/endereço e UPSERT atômico para login, cadastro e IA. `SecurityHeadersMiddleware` adiciona headers e no-store às respostas da API; Next config adiciona headers de proteção ao frontend. `Settings` exige CORS HTTPS não loopback e `RATE_LIMIT_SECRET` explícito em produção; docs API ficam desabilitadas por padrão nesse ambiente. Migration `20260913_10` depende de `20260913_09`. Veja [security.md](security.md) e [privacy-lgpd.md](privacy-lgpd.md).

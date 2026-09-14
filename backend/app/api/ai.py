@@ -7,6 +7,7 @@ from app.ai.generation import ContextPreview, GenerationInput, generate, preview
 from app.ai.provider import AIProvider, OpenAIProvider
 from app.api.dependencies import AppSettings, CurrentUser, DbSession, require_roles
 from app.api.professionals import no_cache
+from app.core.rate_limit import consume
 from app.models import UserRole
 from app.schemas.diet import VersionResponse as DietResponse
 from app.schemas.workout import VersionResponse as WorkoutResponse
@@ -48,6 +49,8 @@ def generate_diet(
     settings: AppSettings,
     provider: Provider,
 ) -> DietResponse:
+    if settings.ai_enabled and settings.ai_api_key:
+        consume(db, settings, "ai", str(actor.id), limit=10, period_seconds=3600)
     return DietResponse.model_validate(
         generate(db, actor, student_id, "diet", data, settings, provider)
     )
@@ -62,6 +65,8 @@ def generate_workout(
     settings: AppSettings,
     provider: Provider,
 ) -> WorkoutResponse:
+    if settings.ai_enabled and settings.ai_api_key:
+        consume(db, settings, "ai", str(actor.id), limit=10, period_seconds=3600)
     return WorkoutResponse.model_validate(
         generate(db, actor, student_id, "workout", data, settings, provider)
     )

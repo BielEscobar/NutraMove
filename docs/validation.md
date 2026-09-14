@@ -288,3 +288,14 @@ Backend: 373 testes passaram, nenhum pulado; Ruff check e format --check aprovad
 - Biome (131 arquivos), TypeScript e Next build: aprovados. Build final usou distDir temporário devido EPERM no cache .next do OneDrive, depois config e cache temporários restaurados/removidos.
 - Compose config --quiet, Docker build backend e Alembic check: aprovados.
 - Sem chamada paga, sem inspeção visual/browser real ou smoke visual dos Dias 10/11 nesta execução.
+
+## Dia 13 — hardening e regressão
+
+- Branch inicial `develop` limpa; Alembic heads/current `20260913_09`. Migration nova `20260913_10` aplicada localmente; `current` confirmou head e `check` não encontrou novas operações. Testes em schemas PostgreSQL descartáveis exercitaram downgrade/upgrade.
+- Suíte backend completa: **404 passaram, nenhum pulado**, 7 testes novos; um aviso interno Starlette/AnyIO. A primeira rodada encontrou expectativa antiga de nome de função no log; após alinhar o teste à sanitização, a segunda rodada completa passou.
+- Ruff check e format --check aprovados; mypy strict em 121 arquivos; `pip check` sem incompatibilidades.
+- Biome em 131 arquivos, TypeScript e Next build aprovados. Um rebuild encontrou arquivo `.next` bloqueado pelo OneDrive; após remover somente o cache gerado, o build final passou.
+- `npm audit --omit=dev --audit-level=high`: zero vulnerabilidades no conjunto auditado. Não houve atualização de dependências.
+- Compose config --quiet, Docker build backend e backend local atualizado passaram; `/health` respondeu 200. O build Docker precisou ser repetido fora do sandbox por acesso negado ao contexto.
+- Chrome headless real abriu login/estado de erro em 1366, 1024, 768 e 375 px. Medição DevTools: `scrollWidth` 1366/1024/753/375, sem overflow horizontal. Mobile 375 repetido no build final. A captura CLI inicial de 375 px foi recortada pelo viewport mínimo do Chrome e descartada como evidência de defeito. Não houve navegador autenticado para Student/Professional/MASTER nem auditoria WCAG; dívida visual dos Dias 10–12 permanece.
+- `git diff --check` aprovado; nenhum segredo encontrado em varredura de padrões dos arquivos alterados; artefatos temporários de navegador removidos. Nenhum commit, push, deploy ou chamada real de IA. Detalhes e débitos em [dia13-relatorio.md](dia13-relatorio.md).

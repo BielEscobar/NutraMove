@@ -43,5 +43,6 @@ def test_secure_cookie_name() -> None:
         database_url=PostgresDsn("postgresql+psycopg://test:test@localhost/test"),
         cookie_secure=True,
         cors_origins=["https://app.example.com"],
+        rate_limit_secret="test-only-secret-with-at-least-32-characters",
     )
     assert settings.session_cookie_name == "__Host-nutramove_session"

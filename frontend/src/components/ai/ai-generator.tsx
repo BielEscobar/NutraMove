@@ -79,11 +79,13 @@ export function AIGenerator({
         setError(
           cause instanceof ApiError && cause.status === 404
             ? "Aluno fora da carteira atual. Atualize a página."
-            : cause instanceof ApiError && cause.status === 503
-              ? "NutraMove AI está indisponível. Tente novamente mais tarde."
-              : cause instanceof ApiError && cause.status === 502
-                ? "A sugestão retornou inválida. Tente novamente."
-                : "Não foi possível gerar a sugestão. Verifique a conexão e tente novamente.",
+            : cause instanceof ApiError && cause.status === 429
+              ? "Limite temporário de gerações atingido. Aguarde e tente novamente."
+              : cause instanceof ApiError && cause.status === 503
+                ? "NutraMove AI está indisponível. Tente novamente mais tarde."
+                : cause instanceof ApiError && cause.status === 502
+                  ? "A sugestão retornou inválida. Tente novamente."
+                  : "Não foi possível gerar a sugestão. Verifique a conexão e tente novamente.",
         );
     } finally {
       guard.current = false;

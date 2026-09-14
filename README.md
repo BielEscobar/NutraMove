@@ -236,3 +236,7 @@ MASTER transfere ou atribui Student pelo detalhe do aluno. O vínculo muda sem r
 ## NutraMove AI — Dia 12
 
 Professional pode gerar sugestões de dieta e treino para alunos ativos da própria carteira. A versão nasce AI_GENERATED/PENDING_REVIEW, é editada e aprovada no fluxo normal. Configure AI_ENABLED e AI_API_KEY no backend/Compose para habilitar. Consulte [NutraMove AI](docs/nutramove-ai.md).
+
+## Hardening e preparação operacional — Dia 13
+
+Login (10/5 min), cadastro público (5/h) e IA (10/h por Professional) possuem limite técnico compartilhado no PostgreSQL. A revisão inclui headers de segurança, cache privado, configuração de produção e inventário de privacidade. Aplique a migration `20260913_10` antes de usar a API atualizada. Veja [segurança](docs/security.md), [privacidade/LGPD](docs/privacy-lgpd.md) e [checklist para Dia 14](docs/production-checklist.md). Não houve deploy de produção.

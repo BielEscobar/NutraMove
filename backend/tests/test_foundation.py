@@ -83,5 +83,5 @@ def test_unexpected_error_does_not_log_personal_data(
     assert response.status_code == 500
     assert secret not in caplog.text
     assert "RuntimeError" in caplog.text
-    assert "sensitive_error" in caplog.text
+    assert "sensitive_error" not in caplog.text
     assert response.headers["access-control-allow-origin"] == "http://localhost:3000"

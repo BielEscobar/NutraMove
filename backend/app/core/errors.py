@@ -1,5 +1,4 @@
 import logging
-import traceback
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -37,9 +36,7 @@ async def validation_error_handler(request: Request, exc: Exception) -> JSONResp
 
 
 async def unexpected_error_handler(request: Request, exc: Exception) -> JSONResponse:
-    frames = traceback.extract_tb(exc.__traceback__)
-    locations = [(frame.filename, frame.lineno, frame.name) for frame in frames]
-    logger.error("Unhandled application error: %s; locations=%s", type(exc).__name__, locations)
+    logger.error("Unhandled application error: %s", type(exc).__name__)
     return JSONResponse(
         status_code=500,
         content={"error": {"code": "internal_error", "message": "Internal server error."}},
