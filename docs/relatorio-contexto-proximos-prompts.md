@@ -52,7 +52,7 @@ Frontend desacoplado: Next.js/React/TypeScript, Tailwind, shadcn/ui e Lucide.
 Biome verifica o frontend; pytest, Ruff e mypy strict verificam o backend.
 Infra local: Docker Compose, PostgreSQL 17, backend como appuser.
 Nenhuma dependência nova foi adicionada nos módulos Professional e Student.
-Hostinger VPS é destino futuro, sem deploy implementado.
+Hostinger VPS é destino futuro. O Dia 14 preparou Compose de produção, Caddy, Next standalone, scripts de backup/restore e runbooks; validou stack sintético local, sem acesso/domínio de VPS e sem deploy público. Alembic HEAD permanece 20260913_10. Consulte deployment.md e dia14-relatorio.md antes de qualquer Dia 15.
 
 ## Entidades reais
 
@@ -350,4 +350,8 @@ NutraMove AI gera dietas e treinos como planos novos do Professional atual, com 
 
 ## Estado complementar — Dia 13
 
-Hardening sem nova feature de negócio: limite PostgreSQL em login/cadastro/IA (migration 20260913_10), security headers, no-store em toda a API, docs configuráveis e validações de produção. Inventário LGPD, matriz de segurança e checklist de produção em privacy-lgpd.md, security.md e production-checklist.md. Dia 14 permanece deploy/infra não implementado. O código real e o relatório dia13-relatorio.md prevalecem sobre este resumo.
+Hardening sem nova feature de negócio: limite PostgreSQL em login/cadastro/IA (migration 20260913_10), security headers, no-store em toda a API, docs configuráveis e validações de produção. Inventário LGPD, matriz de segurança e checklist de produção em privacy-lgpd.md, security.md e production-checklist.md. O Dia 14 acrescentou infraestrutura de produção e runbooks validados localmente, sem deploy na VPS. O código real e os relatórios dia13-relatorio.md e dia14-relatorio.md prevalecem sobre este resumo.
+
+## Encerramento da V1 — Dia 15
+
+A regressão final manteve 404 testes, sem skip; qualidade backend/frontend, Next standalone, imagens Docker, Compose prod, Caddy e Alembic `20260913_10` passaram. A homologação autenticada abriu 28 rotas de MASTER, Professional e Student em quatro larguras, corrigiu a AppShell no desktop/tablet e encerrou sem overflow. README, changelog, entrega ao cliente, manual do operador, checklist e relatório final foram preparados. CODE READY está aprovado localmente; INFRA READY está preparada e validada localmente; PUBLIC DEPLOY READY permanece não validado por ausência de VPS, domínio, DNS e TLS. Nenhuma V2 foi iniciada. Consulte [dia15-relatorio-final.md](dia15-relatorio-final.md).

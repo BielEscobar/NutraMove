@@ -1,0 +1,11 @@
+# NutraMove V1 — guia de entrega ao cliente
+
+O NutraMove reúne o acompanhamento de nutrição e treino em uma aplicação com três perfis. O **MASTER** administra profissionais e alunos, aprova cadastros, realiza transferências e consulta o histórico de auditoria. O **Professional** acompanha somente sua carteira, cria e publica dietas e treinos, registra avaliações, acompanha evolução e hidratação, atende pedidos de reavaliação e publica informativos. O **Student** consulta seu perfil, planos aprovados, evolução, hidratação, informativos e notificações, além de registrar água e solicitar reavaliação.
+
+Dietas e treinos têm versões e só aparecem ao aluno após aprovação do Professional. Avaliações registram peso, altura e medidas; o IMC exibido é um indicador derivado, não um diagnóstico. Hidratação permite meta diária e histórico. Reavaliações seguem estados explícitos até conclusão ou cancelamento. Informativos podem atender toda a carteira ou um aluno, e notificações ficam na inbox do próprio usuário. Transferências preservam histórico e autoria.
+
+O **NutraMove AI** sugere rascunhos estruturados de dieta e treino para revisão do Professional. Ela está desabilitada inicialmente. Quando habilitada após decisão de negócio e privacidade, a sugestão continua pendente, pode ser editada e nunca é publicada automaticamente. A V1 não contém chat, pagamento, WhatsApp, e-mail, execução de treino, upload/análise de fotos, RAG ou IA para Student.
+
+Para operar com segurança, o responsável técnico deve acompanhar health, logs, espaço em disco, migrations e backups diários; testar restore periodicamente; controlar acessos e segredos; e aplicar atualizações por versão. O deploy público ainda requer VPS, DNS, HTTPS, cópia externa de backup e homologação final no endereço real. Consulte [operator-guide.md](operator-guide.md) para rotinas técnicas e [release-checklist.md](release-checklist.md) para os itens de abertura.
+
+Antes de usar dados reais, o cliente/controlador deve concluir política de privacidade, retenção, atendimento a titulares, incidentes e eventual uso de IA externa com apoio apropriado. A documentação técnica não substitui essa decisão. Suporte, responsáveis, horários, RPO/RTO e canal de incidente precisam ser acordados na entrega.

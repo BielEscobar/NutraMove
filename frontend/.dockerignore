@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+node_modules
+.next
+out
+coverage
+*.log
+*.tsbuildinfo
+*.sql
+*.dump
+*.bak
+screenshots
+test-results
+playwright-report

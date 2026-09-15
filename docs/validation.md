@@ -299,3 +299,25 @@ Backend: 373 testes passaram, nenhum pulado; Ruff check e format --check aprovad
 - Compose config --quiet, Docker build backend e backend local atualizado passaram; `/health` respondeu 200. O build Docker precisou ser repetido fora do sandbox por acesso negado ao contexto.
 - Chrome headless real abriu login/estado de erro em 1366, 1024, 768 e 375 px. Medição DevTools: `scrollWidth` 1366/1024/753/375, sem overflow horizontal. Mobile 375 repetido no build final. A captura CLI inicial de 375 px foi recortada pelo viewport mínimo do Chrome e descartada como evidência de defeito. Não houve navegador autenticado para Student/Professional/MASTER nem auditoria WCAG; dívida visual dos Dias 10–12 permanece.
 - `git diff --check` aprovado; nenhum segredo encontrado em varredura de padrões dos arquivos alterados; artefatos temporários de navegador removidos. Nenhum commit, push, deploy ou chamada real de IA. Detalhes e débitos em [dia13-relatorio.md](dia13-relatorio.md).
+
+## Dia 14 — stack de produção preparado, sem VPS
+
+- Estado inicial: `develop`, HEAD `67ee4c0`, Alembic heads/current `20260913_10`; arquivo não rastreado preexistente na raiz preservado.
+- Backend: `pytest -q` **404 passaram**, nenhum pulado, um aviso Starlette/AnyIO; Ruff check/format, mypy strict (121 arquivos) e `pip check` aprovados.
+- Frontend: Biome (131 arquivos) e TypeScript aprovados. Docker build usou `npm ci` e executou Next build/TypeScript com `output: standalone`; imagem frontend e backend compiladas com tag sintética local.
+- `docker compose -f infra/compose.prod.yaml config --quiet` aprovado com domínios/segredos sintéticos. `caddy validate` passou sem certificado real. Bash `-n` aprovou os dois scripts operacionais em contêiner Linux.
+- Stack sintético local isolado: PostgreSQL, backend e frontend healthy; DB/API/frontend sem portas publicadas. Backend: `/health` 200, `/docs` e `/openapi.json` 404; configuração `production`, cookie Secure, IA desativada, HMAC secret suficiente. Alembic `upgrade head`, `current=20260913_10 (head)` e `check` sem operações.
+- Persistência: linha fictícia em `rate_limit_windows` permaneceu após recriação do contêiner DB. Dump custom → restore em banco temporário passou; revisão Alembic `20260913_10` e linha fictícia restaurada (`count=1`). Banco/dump temporários removidos.
+- Ainda não executados: scripts completos de backup no host Linux, cron, cópia externa criptografada, DNS/TLS/HTTPS público, firewall/SSH da VPS, IP real atrás de Caddy, smoke autenticado, console/Network, breakpoints e teste de falha/reboot em produção. Stack/volumes/env sintéticos foram removidos após validação. Sem deploy, commit, push ou IA real. Veja [dia14-relatorio.md](dia14-relatorio.md).
+
+## Dia 15 — homologação final da V1
+
+- Suíte backend final: **404 passaram, nenhum pulado**, um aviso interno Starlette/AnyIO, em 10m09s. A primeira rodada atravessou a meia-noite e expôs um teste instável de data futura; após usar margem de dois dias, os 10 casos parametrizados e a suíte completa passaram.
+- Ruff check e format --check: 121 arquivos; mypy strict: 121 arquivos; `pip check`: sem incompatibilidades.
+- Biome: 131 arquivos; TypeScript e Next production build aprovados. `npm audit --omit=dev --audit-level=high`: zero vulnerabilidades.
+- Chrome headless, API real e schema PostgreSQL temporário: 112 combinações autenticadas (28 rotas × 4 larguras) de MASTER, Professional e Student em 1366/1024/768/375 px. Nenhum overflow na rodada final e nenhuma exceção JavaScript. Os `net::ERR_ABORTED` registrados decorreram exclusivamente da navegação forçada entre rotas.
+- A inspeção das capturas encontrou e corrigiu a AppShell sem `display:grid` no desktop e a composição estreita em 768 px. Capturas finais desktop/mobile dos três perfis foram inspecionadas. Schema, contas, credenciais, screenshots e perfil Chrome temporários foram removidos.
+- Alembic heads/current/check: `20260913_10 (head)`, sem operação nova. Compose prod config, imagens backend/frontend, Next standalone, Caddy validate e Bash `-n` dos scripts operacionais passaram com valores fictícios.
+- Persistência e dump/restore sintéticos permanecem comprovados pelo teste do Dia 14, sem mudança do mecanismo. Não houve restore sobre banco operacional.
+- Git/segredos: arquivo acidental de ajuda do `less` removido após inspeção; varredura encontrou somente senhas explícitas de teste e URL fictícia em testes. `git diff --check` aprovado. Nenhum commit, push, merge, tag, provider pago ou deploy público.
+- Classificação: **CODE READY = sim localmente; INFRA READY = preparada e validada localmente; PUBLIC DEPLOY READY = não validado** por ausência de VPS, domínio, DNS e TLS.

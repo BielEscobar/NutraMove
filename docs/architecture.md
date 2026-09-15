@@ -61,7 +61,7 @@ O backend usa usuário sem privilégios de root no contêiner.
 Migrations são executadas explicitamente, antes de usar novas rotas.
 
 develop é a branch de desenvolvimento; main é reservada para produção.
-TLS, proxy, backups e deploy na Hostinger não foram implementados.
+O Dia 14 preparou `infra/compose.prod.yaml`: Caddy na borda 80/443, Next e FastAPI em rede privada `edge`, PostgreSQL em rede interna `data` e volumes persistentes. Caddy termina TLS automático para `APP_DOMAIN`/`API_DOMAIN`; o backend confia somente no IP estático do Caddy para headers encaminhados. Migration é comando único, sem execução automática por réplicas. Scripts de backup lógico no host e verificação de restore foram preparados; o ciclo equivalente foi testado em banco temporário sintético. DNS, certificado público, VPS e cópia externa de backup ainda não foram implantados. Veja [deployment.md](deployment.md).
 Dependências Python diretas estão fixadas; as transitivas ainda não têm lockfile.
 O frontend utiliza package-lock.json.
 

@@ -128,14 +128,14 @@ export function AppShell({
     );
   const home = homeForRole(user.role);
   return (
-    <div className="min-h-screen bg-background md:grid md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[230px_minmax(0,1fr)]">
+    <div className="grid min-h-screen w-full max-w-full grid-cols-1 overflow-x-hidden bg-background lg:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[230px_minmax(0,1fr)]">
       <a
         href="#app-content"
         className="sr-only focus:not-sr-only focus:fixed focus:z-50 focus:bg-white focus:p-3"
       >
         Ir para o conteúdo
       </a>
-      <aside className="border-b border-border bg-white md:sticky md:top-0 md:h-screen md:border-r md:border-b-0">
+      <aside className="border-b border-border bg-white lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
         <Link
           href={home}
           className="flex min-h-20 items-center gap-2 px-5 py-5 text-lg font-semibold tracking-tight"
@@ -148,7 +148,7 @@ export function AppShell({
         </p>
         <nav
           aria-label={labels[user.role]}
-          className="grid grid-cols-2 gap-1 p-3 sm:grid-cols-3 md:grid-cols-1"
+          className="app-navigation grid gap-1 p-3"
         >
           {navigation[user.role].map(({ href, label, icon: Icon }) => {
             const selected =
@@ -166,7 +166,7 @@ export function AppShell({
             );
           })}
         </nav>
-        <p className="absolute bottom-6 hidden px-5 text-xs text-muted-foreground md:block">
+        <p className="absolute bottom-6 hidden px-5 text-xs text-muted-foreground lg:block">
           Nutrição. Movimento. Cuidado.
         </p>
       </aside>

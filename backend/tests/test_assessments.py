@@ -190,7 +190,7 @@ def test_injected_fields(
         {"height_cm": -1},
         {"weight_kg": "NaN"},
         {"height_cm": 1e-100},
-        {"assessment_date": (date.today() + timedelta(days=1)).isoformat()},
+        {"assessment_date": (date.today() + timedelta(days=2)).isoformat()},
         {"measurements": [{"measurement_type": "FREE", "value_cm": 30}]},
         {"measurements": [{"measurement_type": "WAIST", "side": "LEFT", "value_cm": 30}]},
         {"measurements": [{"measurement_type": "ARM", "side": "LEFT", "value_cm": 0}]},

@@ -18,3 +18,13 @@ Este checklist é uma lista de decisões e verificações para futura implantaç
 - [ ] Revisar acessibilidade/responsividade e executar teste de restore antes de abrir acesso real; registrar responsáveis e evidências.
 
 Nenhum item deste checklist representa implantação já realizada.
+
+## Evidência local do Dia 14
+
+- [x] Compose de produção com redes separadas, volumes e healthchecks validado com variáveis sintéticas; backend/frontend Docker build passaram.
+- [x] Caddyfile validado em contêiner sem solicitar certificado real.
+- [x] PostgreSQL isolado manteve dado sintético após recriação do contêiner; migration 20260913_10, dump e restore em banco temporário conferidos.
+- [x] Backend de produção sintético: health 200, docs/OpenAPI 404, Secure configurado, IA desativada; Next standalone healthy. DB/API/frontend sem portas publicadas no host.
+- [ ] DNS/HTTPS real, IP real através do proxy, firewall/SSH da VPS, backup externo e smoke autenticado dos perfis: dependem do ambiente Hostinger e de domínios/credenciais operacionais ainda não disponíveis.
+
+Runbooks: [deployment.md](deployment.md), [backup-restore.md](backup-restore.md) e [rollback.md](rollback.md). Esses checks locais não aprovam abertura a usuários reais.
