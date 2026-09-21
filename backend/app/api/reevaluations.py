@@ -1,11 +1,14 @@
+from pathlib import Path
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from pydantic import ValidationError
 
-from app.api.dependencies import CurrentUser, DbSession, require_roles
+from app.api.dependencies import AppSettings, CurrentUser, DbSession, require_roles
 from app.api.professionals import no_cache
 from app.models import UserRole
+from app.models.progress_photo import PhotoSetSource
 from app.models.reevaluation import ReevaluationRequest
 from app.repositories import reevaluations
 from app.schemas.reevaluation import (
@@ -20,6 +23,7 @@ from app.schemas.reevaluation import (
     StaffReevaluationList,
     StaffReevaluationResponse,
 )
+from app.services import progress_photos
 from app.services import reevaluations as service
 from app.services.students import get
 
@@ -54,6 +58,48 @@ def staff_response(
 @student_router.post("", status_code=201)
 def create(data: ReevaluationCreate, db: DbSession, actor: CurrentUser) -> ReevaluationResponse:
     return ReevaluationResponse.model_validate(service.create(db, actor, data))
+
+
+@student_router.post("/with-photos", status_code=201)
+async def create_with_photos(
+    db: DbSession,
+    actor: CurrentUser,
+    settings: AppSettings,
+    data: Annotated[str, Form()],
+    front: Annotated[UploadFile, File()],
+    side: Annotated[UploadFile, File()],
+) -> ReevaluationResponse:
+    try:
+        parsed = ReevaluationCreate.model_validate_json(data)
+    except ValidationError as error:
+        from fastapi import HTTPException
+
+        raise HTTPException(422, "Revise os dados da reavaliação.") from error
+    if parsed.snapshot is None:
+        from fastapi import HTTPException
+
+        raise HTTPException(422, "O snapshot atualizado é obrigatório.")
+    prepared_front = await progress_photos.prepare(front, settings)
+    prepared_side = await progress_photos.prepare(side, settings)
+    written: list[Path] = []
+    try:
+        record = service.create(db, actor, parsed, commit=False)
+        _, written = progress_photos.add_set(
+            db,
+            settings,
+            record.student_id,
+            PhotoSetSource.REEVALUATION,
+            prepared_front,
+            prepared_side,
+            reevaluation_id=record.id,
+            context="Reavaliação",
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        progress_photos.cleanup(written)
+        raise
+    return ReevaluationResponse.model_validate(record)
 
 
 @student_router.get("")

@@ -153,6 +153,89 @@ def test_creation_and_tree(
     assert "password" not in str(draft) and "token" not in str(draft)
 
 
+def test_delete_draft_removes_tree_and_empty_parent(
+    client: TestClient, family: Family, draft: dict[str, object], db: Session
+) -> None:
+    version_id = UUID(str(draft["id"]))
+    workout_id = UUID(str(draft["workout_id"]))
+    exercise_id = db.get(WorkoutVersion, version_id).days[0].exercises[0].id  # type: ignore[union-attr]
+    path = f"/professional/workout-versions/{version_id}"
+    assert client.delete(path, headers=ORIGIN).status_code == 204
+    db.expire_all()
+    assert db.get(WorkoutVersion, version_id) is None
+    assert db.get(WorkoutExercise, exercise_id) is None
+    assert db.get(Workout, workout_id) is None
+    assert client.get(path).status_code == 404
+
+
+def test_delete_workout_authorization_and_published_history(
+    client: TestClient, family: Family, draft: dict[str, object]
+) -> None:
+    path = f"/professional/workout-versions/{draft['id']}"
+    assert client.delete(path).status_code == 403
+    login(client, family.b.user)
+    assert client.delete(path, headers=ORIGIN).status_code == 404
+    login(client, family.master)
+    assert client.delete(path, headers=ORIGIN).status_code == 403
+    login(client, family.student_a.user)
+    assert client.delete(path, headers=ORIGIN).status_code == 403
+    client.cookies.clear()
+    assert client.delete(path, headers=ORIGIN).status_code == 401
+    login(client, family.a.user)
+    approved = client.post(path + "/approve", headers=ORIGIN, json={"expected_revision": 1})
+    assert approved.status_code == 200, approved.text
+    assert client.delete(path, headers=ORIGIN).status_code == 409
+    assert client.get(path).json()["status"] == "APPROVED"
+
+
+def test_delete_one_unpublished_version_preserves_other_version_and_parent(
+    client: TestClient, draft: dict[str, object], db: Session, content: dict[str, object]
+) -> None:
+    created = client.post(
+        f"/professional/workouts/{draft['workout_id']}/versions", headers=ORIGIN, json=content
+    )
+    assert created.status_code == 201, created.text
+    assert (
+        client.delete(
+            f"/professional/workout-versions/{created.json()['id']}", headers=ORIGIN
+        ).status_code
+        == 204
+    )
+    db.expire_all()
+    assert db.get(Workout, UUID(str(draft["workout_id"]))) is not None
+    assert client.get(f"/professional/workout-versions/{draft['id']}").status_code == 200
+
+
+@pytest.mark.parametrize(
+    "status,expected", [(WorkoutStatus.PENDING_REVIEW, 204), (WorkoutStatus.ARCHIVED, 409)]
+)
+def test_delete_workout_status_policy(
+    client: TestClient,
+    draft: dict[str, object],
+    db: Session,
+    status: WorkoutStatus,
+    expected: int,
+) -> None:
+    version = db.get(WorkoutVersion, UUID(str(draft["id"])))
+    assert version is not None
+    version.status = status
+    db.commit()
+    response = client.delete(f"/professional/workout-versions/{draft['id']}", headers=ORIGIN)
+    assert response.status_code == expected
+
+
+def test_delete_workout_after_transfer_rejects_former_and_new_owner(
+    client: TestClient, family: Family, draft: dict[str, object], db: Session
+) -> None:
+    family.student_a.professional_id = family.b.id
+    db.commit()
+    path = f"/professional/workout-versions/{draft['id']}"
+    assert client.delete(path, headers=ORIGIN).status_code == 404
+    login(client, family.b.user)
+    assert client.delete(path, headers=ORIGIN).status_code == 404
+    assert db.get(WorkoutVersion, UUID(str(draft["id"]))) is not None
+
+
 @pytest.mark.parametrize(
     "field,value",
     [
@@ -268,6 +351,115 @@ def test_creation_atomic(
     finally:
         event.remove(WorkoutExercise, "before_insert", fail)
     assert db.scalar(select(Workout)) is None
+
+
+@pytest.mark.parametrize("source", [WorkoutSource.MANUAL, WorkoutSource.AI_GENERATED])
+@pytest.mark.parametrize(
+    "days",
+    [
+        [],
+        [{"name": "Descanso", "isRest": True, "exercises": []}],
+        [{"name": "Dia ativo", "isRest": False, "exercises": []}],
+        [{"name": "Descanso", "isRest": False, "exercises": []}],
+        [
+            {"name": "Dia ativo", "exercises": [{"name": "Agachamento"}]},
+            {"name": "Dia vazio", "isRest": False, "exercises": []},
+        ],
+    ],
+    ids=["empty", "rest-only", "empty-active", "rest-name-active", "mixed-invalid"],
+)
+def test_publish_rejects_incomplete_workout_for_any_source(
+    client: TestClient,
+    db: Session,
+    draft: dict[str, object],
+    content: dict[str, object],
+    source: WorkoutSource,
+    days: list[dict[str, object]],
+) -> None:
+    path = f"/professional/workout-versions/{draft['id']}"
+    update = client.patch(
+        path, headers=ORIGIN, json={**content, "days": days, "expected_revision": 1}
+    )
+    assert update.status_code == 200, update.text
+    version = db.get(WorkoutVersion, UUID(str(draft["id"])))
+    assert version is not None
+    version.source = source
+    version.status = (
+        WorkoutStatus.PENDING_REVIEW
+        if source == WorkoutSource.AI_GENERATED
+        else WorkoutStatus.DRAFT
+    )
+    db.commit()
+    result = client.post(path + "/approve", headers=ORIGIN, json={"expected_revision": 2})
+    assert result.status_code == 422, result.text
+    persisted = db.get(WorkoutVersion, UUID(str(draft["id"])))
+    assert persisted is not None and persisted.status != WorkoutStatus.APPROVED
+
+
+@pytest.mark.parametrize("rest_name", ["Recuperação", "Qualquer título"])
+def test_publish_manual_workout_with_rest_without_editing(
+    client: TestClient, family: Family, content: dict[str, object], rest_name: str
+) -> None:
+    base_days = content["days"]
+    assert isinstance(base_days, list)
+    with_rest = {
+        **content,
+        "days": [*base_days, {"name": rest_name, "isRest": True, "exercises": []}],
+    }
+    login(client, family.a.user)
+    created = client.post(
+        f"/professional/students/{family.student_a.id}/workouts",
+        headers=ORIGIN,
+        json=with_rest,
+    )
+    assert created.status_code == 201, created.text
+    path = f"/professional/workout-versions/{created.json()['id']}"
+    approved = client.post(path + "/approve", headers=ORIGIN, json={"expected_revision": 1})
+    assert approved.status_code == 200, approved.text
+    assert approved.json()["status"] == "APPROVED"
+    login(client, family.student_a.user)
+    visible = client.get("/student/workout").json()["workout"]
+    assert visible["days"][1]["exercises"] == []
+    assert visible["days"][1]["isRest"] is True
+
+
+def test_rest_day_with_exercise_is_rejected(
+    client: TestClient, family: Family, content: dict[str, object]
+) -> None:
+    login(client, family.a.user)
+    result = client.post(
+        f"/professional/students/{family.student_a.id}/workouts",
+        headers=ORIGIN,
+        json={
+            **content,
+            "days": [{"name": "Recuperação", "isRest": True, "exercises": [{"name": "Corrida"}]}],
+        },
+    )
+    assert result.status_code == 422
+
+
+def test_publish_rejects_seven_active_days(
+    client: TestClient, family: Family, content: dict[str, object]
+) -> None:
+    login(client, family.a.user)
+    created = client.post(
+        f"/professional/students/{family.student_a.id}/workouts",
+        headers=ORIGIN,
+        json={
+            **content,
+            "days": [
+                {"name": f"Dia {index}", "isRest": False, "exercises": [{"name": "Movimento"}]}
+                for index in range(7)
+            ],
+        },
+    )
+    assert created.status_code == 201, created.text
+    result = client.post(
+        f"/professional/workout-versions/{created.json()['id']}/approve",
+        headers=ORIGIN,
+        json={"expected_revision": 1},
+    )
+    assert result.status_code == 422, result.text
 
 
 def test_publish_duplicate_history(

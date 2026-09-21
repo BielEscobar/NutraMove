@@ -1,9 +1,4 @@
-import { AppShell } from "@/components/app-shell";
 import { InformationListPage } from "@/components/informations/information-list";
 export default function Page() {
-  return (
-    <AppShell allowedRole="PROFESSIONAL">
-      <InformationListPage area="professional" />
-    </AppShell>
-  );
+  return <InformationListPage area="professional" />;
 }

@@ -116,3 +116,7 @@ estruturadas da NutraMove AI e submetê-las à revisão profissional. Não há g
 chave, envio de dados pessoais, publicação automática ou equivalência nutricional.
 Listas de dietas/versões ainda não têm paginação; avaliar conforme volume real.
 Continuam os débitos anteriores de proteção contra abuso, operação e privacidade.
+
+## Exclusão de versões não publicadas
+
+Professional da carteira atual pode excluir DRAFT/PENDING_REVIEW no detalhe da versão após confirmação. APPROVED/ARCHIVED retornam 409. A exclusão remove refeições, alimentos e substituições; se não houver mais versões, remove também o plano pai. O outro tipo de plano do Student não é afetado.

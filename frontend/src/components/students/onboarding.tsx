@@ -11,7 +11,14 @@ import {
   profilePayload,
 } from "./profile-fields";
 
-const steps = ["Conta", ...groups.map((group) => group.title), "Revisão"];
+const steps = [
+  "Conta",
+  ...groups.map((group) => group.title),
+  "Fotos de evolução",
+  "Revisão",
+];
+const photoStep = 1 + groups.length;
+const reviewStep = photoStep + 1;
 export function Onboarding({ professionalId }: { professionalId: string }) {
   const [step, setStep] = useState(0);
   const [account, setAccount] = useState({
@@ -22,6 +29,8 @@ export function Onboarding({ professionalId }: { professionalId: string }) {
     professional_id: professionalId,
   });
   const [profile, setProfile] = useState<ProfileDraft>({});
+  const [front, setFront] = useState<File | null>(null);
+  const [side, setSide] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const [error, setError] = useState("");
@@ -41,14 +50,18 @@ export function Onboarding({ professionalId }: { professionalId: string }) {
       return;
     }
     if (
-      step === 2 &&
+      step === 1 &&
       profile.goal === "OTHER" &&
       !profile.goal_detail?.trim()
     ) {
       setError("Descreva seu objetivo.");
       return;
     }
-    if (step < 5) {
+    if (step === photoStep && (!front || !side)) {
+      setError("Envie as fotos frontal e lateral.");
+      return;
+    }
+    if (step < reviewStep) {
       setStep(step + 1);
       return;
     }
@@ -56,13 +69,20 @@ export function Onboarding({ professionalId }: { professionalId: string }) {
     submitting.current = true;
     setBusy(true);
     try {
-      await apiRequest("/students/register", {
-        method: "POST",
-        body: JSON.stringify({
+      const form = new FormData();
+      form.set(
+        "data",
+        JSON.stringify({
           ...account,
           professional_id: account.professional_id.trim() || null,
           ...profilePayload(profile),
         }),
+      );
+      form.set("front", front as File);
+      form.set("side", side as File);
+      await apiRequest("/students/register-with-photos", {
+        method: "POST",
+        body: form,
       });
       setAccount({
         name: "",
@@ -221,7 +241,7 @@ export function Onboarding({ professionalId }: { professionalId: string }) {
             </div>
           </div>
         )}
-        {step > 0 && step < 5 && (
+        {step > 0 && step <= groups.length && (
           <ProfileFields
             group={step - 1}
             values={profile}
@@ -229,7 +249,35 @@ export function Onboarding({ professionalId }: { professionalId: string }) {
             disabled={busy}
           />
         )}
-        {step === 5 && (
+        {step === photoStep && (
+          <div className="space-y-5">
+            <p className="rounded-md bg-secondary p-4 text-sm">
+              Envie fotos do corpo para acompanhamento da sua evolução. Não
+              inclua o rosto nas imagens.
+            </p>
+            <label className="block text-sm font-medium">
+              Foto frontal *
+              <input
+                className="auth-input mt-2"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                required
+                onChange={(e) => setFront(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <label className="block text-sm font-medium">
+              Foto lateral *
+              <input
+                className="auth-input mt-2"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                required
+                onChange={(e) => setSide(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          </div>
+        )}
+        {step === reviewStep && (
           <div className="space-y-6">
             <p>Confira seus dados antes de enviar. Use Voltar para corrigir.</p>
             <p className="break-words">
@@ -265,7 +313,11 @@ export function Onboarding({ professionalId }: { professionalId: string }) {
             Voltar
           </button>
           <button className="master-primary" type="submit" disabled={busy}>
-            {busy ? "Enviando…" : step === 5 ? "Enviar cadastro" : "Continuar"}
+            {busy
+              ? "Enviando…"
+              : step === reviewStep
+                ? "Enviar cadastro"
+                : "Continuar"}
           </button>
         </div>
       </form>

@@ -1,9 +1,10 @@
 "use client";
 
-import { Leaf, LoaderCircle, LogOut } from "lucide-react";
+import { LoaderCircle, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { NutraMoveLogo } from "@/components/nutramove-logo";
 import { ApiError, apiRequest, type User } from "@/lib/api";
 
 const roleLabels: Record<User["role"], string> = {
@@ -58,10 +59,7 @@ export default function AccountPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-5">
-          <div className="flex items-center gap-2 font-semibold tracking-tight">
-            <Leaf className="size-6 text-primary" aria-hidden="true" />{" "}
-            NUTRAMOVE
-          </div>
+          <NutraMoveLogo className="h-auto w-32" priority />
           {user && (
             <button
               type="button"

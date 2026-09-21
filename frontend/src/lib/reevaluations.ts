@@ -24,6 +24,7 @@ export type ReevaluationBrief = {
 };
 export type Reevaluation = Omit<ReevaluationBrief, "reason_summary"> & {
   reason: string;
+  snapshot: Record<string, unknown> | null;
   professional_response: string | null;
   updated_at: string;
   reviewed_at: string | null;

@@ -192,7 +192,7 @@ export function AIGenerator({
           {result ? (
             <Link
               className="master-primary min-h-11"
-              href={`/professional/${kind === "diet" ? "diet" : "workout"}-versions/${result.id}/edit`}
+              href={`/professional/${kind === "diet" ? "diet" : "workout"}-versions/${result.id}`}
             >
               Revisar {title}
             </Link>

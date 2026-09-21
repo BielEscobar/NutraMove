@@ -18,6 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { NutraMoveLogo } from "@/components/nutramove-logo";
 import { apiRequest, type User } from "@/lib/api";
 import { homeForRole } from "@/lib/students";
 import { useApiResource } from "@/lib/use-api-resource";
@@ -138,10 +139,9 @@ export function AppShell({
       <aside className="border-b border-border bg-white lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
         <Link
           href={home}
-          className="flex min-h-20 items-center gap-2 px-5 py-5 text-lg font-semibold tracking-tight"
+          className="flex min-h-24 items-center justify-center px-4 py-3"
         >
-          <Leaf className="size-6 shrink-0 text-primary" aria-hidden="true" />
-          NUTRAMOVE
+          <NutraMoveLogo className="h-auto w-full max-w-40" priority />
         </Link>
         <p className="px-5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {labels[user.role]}

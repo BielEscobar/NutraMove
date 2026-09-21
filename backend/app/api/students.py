@@ -1,7 +1,9 @@
+from pathlib import Path
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
+from pydantic import ValidationError
 
 from app.api.dependencies import (
     AppSettings,
@@ -13,6 +15,7 @@ from app.api.dependencies import (
 from app.api.professionals import no_cache
 from app.core.rate_limit import consume
 from app.models import UserRole
+from app.models.progress_photo import PhotoSetSource
 from app.repositories import students
 from app.schemas.student import (
     MasterStudentFilters,
@@ -23,6 +26,7 @@ from app.schemas.student import (
     StudentResponse,
     StudentUpdate,
 )
+from app.services import progress_photos
 from app.services import students as service
 
 router = APIRouter(tags=["students"], dependencies=[Depends(no_cache)])
@@ -56,6 +60,56 @@ def register(
         period_seconds=3600,
     )
     student = service.create(db, data)
+    return StudentRegistrationResponse(status=student.status)
+
+
+@router.post(
+    "/students/register-with-photos",
+    status_code=201,
+    response_model=StudentRegistrationResponse,
+    dependencies=[Depends(require_trusted_origin)],
+)
+async def register_with_photos(
+    request: Request,
+    db: DbSession,
+    settings: AppSettings,
+    data: Annotated[str, Form()],
+    front: Annotated[UploadFile, File()],
+    side: Annotated[UploadFile, File()],
+) -> StudentRegistrationResponse:
+    consume(
+        db,
+        settings,
+        "register",
+        request.client.host if request.client else "unknown",
+        limit=5,
+        period_seconds=3600,
+    )
+    try:
+        parsed = StudentCreate.model_validate_json(data)
+    except ValidationError as error:
+        from fastapi import HTTPException
+
+        raise HTTPException(422, "Revise os dados do cadastro.") from error
+    prepared_front = await progress_photos.prepare(front, settings)
+    prepared_side = await progress_photos.prepare(side, settings)
+    written: list[Path] = []
+    try:
+        student = service.create(db, parsed, commit=False)
+        _, written = progress_photos.add_set(
+            db,
+            settings,
+            student.id,
+            PhotoSetSource.INITIAL,
+            prepared_front,
+            prepared_side,
+            context="Cadastro inicial",
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        progress_photos.cleanup(written)
+        raise
     return StudentRegistrationResponse(status=student.status)
 
 

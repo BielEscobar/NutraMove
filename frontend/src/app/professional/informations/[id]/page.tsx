@@ -1,4 +1,3 @@
-import { AppShell } from "@/components/app-shell";
 import { InformationDetailPage } from "@/components/informations/information-detail";
 export default async function Page({
   params,
@@ -6,9 +5,5 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return (
-    <AppShell allowedRole="PROFESSIONAL">
-      <InformationDetailPage area="professional" id={id} />
-    </AppShell>
-  );
+  return <InformationDetailPage area="professional" id={id} />;
 }

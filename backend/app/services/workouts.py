@@ -37,6 +37,7 @@ def apply_content(version: WorkoutVersion, content: VersionContent) -> None:
         WorkoutDay(
             name=day.name,
             description=day.description,
+            is_rest=day.is_rest,
             position=day_index,
             exercises=[
                 WorkoutExercise(**exercise.model_dump(), position=exercise_index)
@@ -115,6 +116,29 @@ def duplicate(db: Session, actor: User, version_id: UUID) -> WorkoutVersion:
     return version
 
 
+def delete_unpublished(db: Session, actor: User, version_id: UUID) -> None:
+    version = workouts.get_version(db, actor, version_id, lock=True)
+    if version.status not in {WorkoutStatus.DRAFT, WorkoutStatus.PENDING_REVIEW}:
+        raise HTTPException(409, "Versões publicadas ou arquivadas não podem ser excluídas.")
+    workout_id = version.workout_id
+    db.delete(version)
+    try:
+        db.flush()
+        remaining = db.scalar(
+            select(WorkoutVersion.id).where(WorkoutVersion.workout_id == workout_id).limit(1)
+        )
+        if remaining is None:
+            parent = db.get(Workout, workout_id)
+            if parent is not None:
+                db.delete(parent)
+        commit(db)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            409, "Conflito ao excluir o treino. Atualize e tente novamente."
+        ) from None
+
+
 def check_editable(version: WorkoutVersion, expected_revision: int) -> None:
     if version.status not in {WorkoutStatus.DRAFT, WorkoutStatus.PENDING_REVIEW}:
         raise HTTPException(409, "Versão publicada ou arquivada: crie uma nova versão.")
@@ -150,8 +174,15 @@ def approve(db: Session, actor: User, version_id: UUID, expected_revision: int) 
     student = get_student(db, actor, workout.student_id)
     if student.status != StudentStatus.ACTIVE:
         raise HTTPException(409, "A publicação exige um aluno com acompanhamento ativo.")
-    if not version.days or any(not day.exercises for day in version.days):
-        raise HTTPException(422, "Inclua ao menos uma divisão e um exercício por divisão.")
+    if (
+        not version.days
+        or not 1 <= sum(not day.is_rest for day in version.days) <= 6
+        or any(
+            (day.is_rest and bool(day.exercises)) or (not day.is_rest and not day.exercises)
+            for day in version.days
+        )
+    ):
+        raise HTTPException(422, "Adicione ao menos um dia de treino ativo com exercícios.")
     now = datetime.now(UTC)
     db.execute(
         update(WorkoutVersion)

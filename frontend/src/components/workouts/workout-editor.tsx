@@ -4,47 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { ApiError, apiRequest } from "@/lib/api";
-import type {
-  WorkoutContent,
-  WorkoutDay,
-  WorkoutExercise,
-  WorkoutVersion,
-} from "@/lib/workouts";
+import {
+  clean,
+  type Draft,
+  type EditDay,
+  type EditExercise,
+  hasUnsavedChanges,
+  hydrate,
+} from "@/lib/workout-draft";
+import type { WorkoutVersion } from "@/lib/workouts";
 
-type EditExercise = WorkoutExercise & { key: string };
-type EditDay = Omit<WorkoutDay, "exercises"> & {
-  key: string;
-  exercises: EditExercise[];
-};
-type Draft = Omit<WorkoutContent, "days"> & { days: EditDay[] };
-function hydrate(content: WorkoutContent): Draft {
-  return {
-    ...content,
-    days: content.days.map((day) => ({
-      ...day,
-      key: crypto.randomUUID(),
-      exercises: day.exercises.map((exercise) => ({
-        ...exercise,
-        key: crypto.randomUUID(),
-      })),
-    })),
-  };
-}
-function clean(draft: Draft): WorkoutContent {
-  return {
-    name: draft.name,
-    goal: draft.goal || null,
-    frequency_per_week: draft.frequency_per_week,
-    start_date: draft.start_date || null,
-    next_review_date: draft.next_review_date || null,
-    notes: draft.notes || null,
-    days: draft.days.map((day) => ({
-      name: day.name,
-      description: day.description || null,
-      exercises: day.exercises.map(({ key: _key, ...exercise }) => exercise),
-    })),
-  };
-}
 function emptyExercise(): EditExercise {
   return {
     key: crypto.randomUUID(),
@@ -191,6 +160,7 @@ export function WorkoutEditor({
       },
     ),
   );
+  const savedContent = useRef(JSON.stringify(clean(draft)));
   const [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -206,8 +176,9 @@ export function WorkoutEditor({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
   function change(patch: Partial<Draft>) {
-    setDraft((previous) => ({ ...previous, ...patch }));
-    setDirty(true);
+    const next = { ...draft, ...patch };
+    setDraft(next);
+    setDirty(hasUnsavedChanges(next, savedContent.current));
     setSaved(null);
   }
   function dayChange(index: number, patch: Partial<EditDay>) {
@@ -250,6 +221,7 @@ export function WorkoutEditor({
           ...(initial ? { expected_revision: initial.edit_revision } : {}),
         }),
       });
+      savedContent.current = JSON.stringify(clean(draft));
       setDirty(false);
       setSaved(version);
     } catch (cause) {
@@ -304,8 +276,10 @@ export function WorkoutEditor({
           : "Novo rascunho de treino"}
       </h1>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        Criado manualmente. O aluno só terá acesso após a publicação. Campos com
-        * são obrigatórios.
+        {initial?.source === "AI_GENERATED"
+          ? "Gerado pela NutraMove AI."
+          : "Criado manualmente."}{" "}
+        O aluno só terá acesso após a publicação. Campos com * são obrigatórios.
       </p>
       <form onSubmit={save} className="mt-6 space-y-6" aria-busy={busy}>
         <fieldset disabled={busy} className="space-y-6">
@@ -373,6 +347,7 @@ export function WorkoutEditor({
                       key: crypto.randomUUID(),
                       name: "",
                       description: null,
+                      isRest: false,
                       exercises: [],
                     },
                   ],
@@ -425,130 +400,160 @@ export function WorkoutEditor({
                     change={(description) => dayChange(di, { description })}
                   />
                 </div>
-                {day.exercises.map((exercise, ei) => (
-                  <div key={exercise.key} className="space-y-4 border-t pt-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <h3 className="font-medium">Exercício {ei + 1}</h3>
-                      <Ordering
-                        label={`exercício ${ei + 1} da divisão ${di + 1}`}
-                        index={ei}
-                        length={day.exercises.length}
-                        onMove={(delta) =>
-                          dayChange(di, {
-                            exercises: move(day.exercises, ei, delta),
-                          })
-                        }
-                        onRemove={() =>
-                          dayChange(di, {
-                            exercises: day.exercises.filter((_, i) => i !== ei),
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <Field
-                        id={`exercise-${exercise.key}-name`}
-                        label="Nome do exercício"
-                        required
-                        value={exercise.name}
-                        change={(name) => exerciseChange(di, ei, { name })}
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-muscle`}
-                        label="Grupo muscular"
-                        value={exercise.muscle_group}
-                        change={(muscle_group) =>
-                          exerciseChange(di, ei, { muscle_group })
-                        }
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-sets`}
-                        label="Séries"
-                        type="number"
-                        value={exercise.sets?.toString() ?? null}
-                        change={(value) =>
-                          exerciseChange(di, ei, {
-                            sets: value === "" ? null : Number(value),
-                          })
-                        }
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-repetitions`}
-                        label="Repetições (ex.: 8-12, falha, 12 por lado)"
-                        value={exercise.repetitions}
-                        change={(repetitions) =>
-                          exerciseChange(di, ei, { repetitions })
-                        }
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-load`}
-                        label="Carga (ex.: 20 kg, peso corporal, RPE 8)"
-                        value={exercise.load}
-                        change={(load) => exerciseChange(di, ei, { load })}
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-duration`}
-                        label="Duração / tempo (ex.: 30 segundos)"
-                        value={exercise.duration}
-                        change={(duration) =>
-                          exerciseChange(di, ei, { duration })
-                        }
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-rest`}
-                        label="Descanso em segundos"
-                        type="number"
-                        min={0}
-                        max={86400}
-                        value={exercise.rest_seconds?.toString() ?? null}
-                        change={(value) =>
-                          exerciseChange(di, ei, {
-                            rest_seconds: value === "" ? null : Number(value),
-                          })
-                        }
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-description`}
-                        label="Descrição do exercício"
-                        maxLength={2000}
-                        value={exercise.description}
-                        change={(description) =>
-                          exerciseChange(di, ei, { description })
-                        }
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-instructions`}
-                        label="Instruções"
-                        type="textarea"
-                        maxLength={2000}
-                        value={exercise.instructions}
-                        change={(instructions) =>
-                          exerciseChange(di, ei, { instructions })
-                        }
-                      />
-                      <Field
-                        id={`exercise-${exercise.key}-notes`}
-                        label="Observações"
-                        type="textarea"
-                        maxLength={2000}
-                        value={exercise.notes}
-                        change={(notes) => exerciseChange(di, ei, { notes })}
-                      />
-                    </div>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="master-secondary"
-                  disabled={day.exercises.length >= 100}
-                  onClick={() =>
-                    dayChange(di, {
-                      exercises: [...day.exercises, emptyExercise()],
-                    })
-                  }
-                >
-                  Adicionar exercício
-                </button>
+                <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={day.isRest}
+                    onChange={(event) =>
+                      dayChange(di, {
+                        isRest: event.target.checked,
+                        exercises: event.target.checked ? [] : day.exercises,
+                      })
+                    }
+                  />
+                  Dia de descanso
+                </label>
+                {day.isRest && (
+                  <p className="text-sm text-muted-foreground">
+                    Dia de descanso sem exercícios.
+                  </p>
+                )}
+                {!day.isRest && (
+                  <>
+                    {day.exercises.map((exercise, ei) => (
+                      <div
+                        key={exercise.key}
+                        className="space-y-4 border-t pt-5"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <h3 className="font-medium">Exercício {ei + 1}</h3>
+                          <Ordering
+                            label={`exercício ${ei + 1} da divisão ${di + 1}`}
+                            index={ei}
+                            length={day.exercises.length}
+                            onMove={(delta) =>
+                              dayChange(di, {
+                                exercises: move(day.exercises, ei, delta),
+                              })
+                            }
+                            onRemove={() =>
+                              dayChange(di, {
+                                exercises: day.exercises.filter(
+                                  (_, i) => i !== ei,
+                                ),
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="grid gap-5 sm:grid-cols-2">
+                          <Field
+                            id={`exercise-${exercise.key}-name`}
+                            label="Nome do exercício"
+                            required
+                            value={exercise.name}
+                            change={(name) => exerciseChange(di, ei, { name })}
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-muscle`}
+                            label="Grupo muscular"
+                            value={exercise.muscle_group}
+                            change={(muscle_group) =>
+                              exerciseChange(di, ei, { muscle_group })
+                            }
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-sets`}
+                            label="Séries"
+                            type="number"
+                            value={exercise.sets?.toString() ?? null}
+                            change={(value) =>
+                              exerciseChange(di, ei, {
+                                sets: value === "" ? null : Number(value),
+                              })
+                            }
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-repetitions`}
+                            label="Repetições (ex.: 8-12, falha, 12 por lado)"
+                            value={exercise.repetitions}
+                            change={(repetitions) =>
+                              exerciseChange(di, ei, { repetitions })
+                            }
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-load`}
+                            label="Carga (ex.: 20 kg, peso corporal, RPE 8)"
+                            value={exercise.load}
+                            change={(load) => exerciseChange(di, ei, { load })}
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-duration`}
+                            label="Duração / tempo (ex.: 30 segundos)"
+                            value={exercise.duration}
+                            change={(duration) =>
+                              exerciseChange(di, ei, { duration })
+                            }
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-rest`}
+                            label="Descanso em segundos"
+                            type="number"
+                            min={0}
+                            max={86400}
+                            value={exercise.rest_seconds?.toString() ?? null}
+                            change={(value) =>
+                              exerciseChange(di, ei, {
+                                rest_seconds:
+                                  value === "" ? null : Number(value),
+                              })
+                            }
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-description`}
+                            label="Descrição do exercício"
+                            maxLength={2000}
+                            value={exercise.description}
+                            change={(description) =>
+                              exerciseChange(di, ei, { description })
+                            }
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-instructions`}
+                            label="Instruções"
+                            type="textarea"
+                            maxLength={2000}
+                            value={exercise.instructions}
+                            change={(instructions) =>
+                              exerciseChange(di, ei, { instructions })
+                            }
+                          />
+                          <Field
+                            id={`exercise-${exercise.key}-notes`}
+                            label="Observações"
+                            type="textarea"
+                            maxLength={2000}
+                            value={exercise.notes}
+                            change={(notes) =>
+                              exerciseChange(di, ei, { notes })
+                            }
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="master-secondary"
+                      disabled={day.exercises.length >= 100}
+                      onClick={() =>
+                        dayChange(di, {
+                          exercises: [...day.exercises, emptyExercise()],
+                        })
+                      }
+                    >
+                      Adicionar exercício
+                    </button>
+                  </>
+                )}
               </div>
             </details>
           ))}
@@ -560,9 +565,13 @@ export function WorkoutEditor({
         )}
         <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-white p-4 shadow-sm">
           <p className="text-sm text-muted-foreground">
-            {dirty ? "Alterações não salvas" : "Rascunho"}
+            {dirty ? "Alterações não salvas" : "Sem alterações não salvas"}
           </p>
-          <button type="submit" disabled={busy} className="master-primary">
+          <button
+            type="submit"
+            disabled={busy || (Boolean(initial) && !dirty)}
+            className="master-primary"
+          >
             {busy ? "Salvando…" : "Salvar rascunho"}
           </button>
         </div>

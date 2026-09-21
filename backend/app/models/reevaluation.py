@@ -3,6 +3,7 @@ from enum import StrEnum
 from uuid import UUID, uuid4
 
 from sqlalchemy import CheckConstraint, DateTime, Enum, ForeignKey, Index, String, func, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -65,6 +66,7 @@ class ReevaluationRequest(Base):
         )
     )
     professional_response: Mapped[str | None] = mapped_column(String(2000))
+    snapshot: Mapped[dict[str, object] | None] = mapped_column(JSONB)
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

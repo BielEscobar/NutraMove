@@ -1,4 +1,4 @@
-name: nutramove-prod
+﻿name: nutramove-prod
 
 x-logs: &service-logs
   driver: json-file
@@ -33,13 +33,18 @@ services:
     restart: unless-stopped
     environment:
       ENVIRONMENT: production
+      PRIVATE_UPLOAD_DIR: /app/private_uploads
+      MAX_PHOTO_BYTES: ${MAX_PHOTO_BYTES:-8388608}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?Set POSTGRES_USER}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:?Set POSTGRES_DB}
       CORS_ORIGINS: '["https://${APP_DOMAIN:?Set APP_DOMAIN}"]'
       COOKIE_SECURE: "true"
       DOCS_ENABLED: "false"
       RATE_LIMIT_SECRET: ${RATE_LIMIT_SECRET:?Set RATE_LIMIT_SECRET}
       BUSINESS_TIMEZONE: ${BUSINESS_TIMEZONE:-America/Sao_Paulo}
-      AI_ENABLED: "false"
+      AI_ENABLED: ${AI_ENABLED:-false}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
+      AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-45}
     command:
       - uvicorn
       - app.main:create_app
@@ -52,6 +57,8 @@ services:
       - --forwarded-allow-ips
       - 172.30.46.10
       - --no-access-log
+    volumes:
+      - private_uploads_prod:/app/private_uploads
     expose:
       - "8000"
     networks:
@@ -123,5 +130,6 @@ networks:
 
 volumes:
   postgres_prod_data:
+  private_uploads_prod:
   caddy_prod_data:
   caddy_prod_config:

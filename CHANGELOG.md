@@ -9,7 +9,7 @@ Primeira versão do NutraMove, com:
 - dietas e treinos versionados, revisão profissional e publicação ao aluno;
 - avaliações, evolução física, hidratação e solicitações de reavaliação;
 - informativos e notificações internas;
-- NutraMove AI opcional para rascunhos de dieta e treino, desabilitada por padrão e sem publicação automática;
+- NutraMove AI opcional para geração assistida de rascunhos de dieta e treino, com revisão profissional obrigatória, desabilitada por padrão e sem publicação automática;
 - hardening de segurança, rate limiting, documentação de privacidade e configuração de produção;
 - stack Docker com Caddy, PostgreSQL persistente, runbooks de deploy, backup/restore e rollback.
 

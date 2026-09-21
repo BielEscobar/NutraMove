@@ -54,7 +54,7 @@ def response(student: Student) -> StudentResponse:
     )
 
 
-def create(db: Session, data: StudentCreate) -> Student:
+def create(db: Session, data: StudentCreate, *, commit: bool = True) -> Student:
     if users.get_by_email(db, str(data.email)):
         raise HTTPException(409, "E-mail já cadastrado.")
     professional = None
@@ -81,7 +81,8 @@ def create(db: Session, data: StudentCreate) -> Student:
         db.flush()
         if professional is not None:
             notify(db, professional.user_id, NotificationType.STUDENT_PENDING_APPROVAL, student.id)
-        db.commit()
+        if commit:
+            db.commit()
     except IntegrityError:
         db.rollback()
         raise HTTPException(409, "Cadastro não pôde ser concluído por conflito de dados.") from None

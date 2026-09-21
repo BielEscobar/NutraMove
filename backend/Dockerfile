@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 COPY --chown=appuser:appuser app ./app
 COPY --chown=appuser:appuser alembic ./alembic
 COPY --chown=appuser:appuser alembic.ini ./
+RUN mkdir -p /app/private_uploads && chown appuser:appuser /app/private_uploads
 USER appuser
 
 EXPOSE 8000

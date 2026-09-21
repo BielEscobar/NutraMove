@@ -76,6 +76,11 @@ export function WorkoutReader({ workout }: { workout: WorkoutContent }) {
                 {day.description}
               </p>
             )}
+            {day.isRest && (
+              <p className="mt-2 text-sm font-medium text-primary">
+                Dia de descanso
+              </p>
+            )}
           </header>
           <ol className="divide-y px-5">
             {day.exercises.map((exercise, index) => (

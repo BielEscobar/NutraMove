@@ -69,7 +69,18 @@ não apenas os campos presentes. expected_revision evita perda de alterações e
 edição e aprovação com revisão obsoleta retornam 409. Falhas desfazem toda a árvore.
 APPROVED e ARCHIVED não permitem edição: duplicar ou criar uma nova versão.
 
-Publicação exige Student ACTIVE, ao menos uma divisão e um exercício em cada divisão.
+Publicação exige Student ACTIVE e de um a seis dias ativos com exercícios. `isRest=true`
+identifica estruturalmente um dia de descanso, que deve ter `exercises=[]`; um dia
+ativo (`isRest=false`) vazio ou um plano somente com descanso continua bloqueado.
+Nome e descrição não determinam o tipo do dia. A mesma regra vale para origem manual
+ou AI_GENERATED. A aprovação explícita do Professional não exige edição prévia.
+Dias da semana sem treino são descanso implícito; não é preciso criar divisões vazias.
+
+A migration `20260920_12` adiciona `workout_days.is_rest` com valor padrão `false`
+para registros antigos. Ela não deduz descanso por texto; um dia antigo que era
+descanso e tinha exercícios vazios precisa ser marcado explicitamente pelo
+Professional antes da publicação. Dias novos preservam o flag em criação, edição,
+duplicação, API e leitura do Student.
 Registra CurrentUser.id e timestamp UTC; arquiva a publicação anterior do aluno na mesma
 transação, inclusive se pertencer a outro Workout. Conteúdo e autoria anteriores permanecem.
 Há um treino vigente por aluno. Diet e Workout são independentes: publicar treino não
@@ -208,3 +219,7 @@ Editor e leitor foram testados em 1366, 1024, 768 e 375 px sem overflow horizont
 exceções JavaScript não tratadas. Capturas representativas dos quatro tamanhos foram
 inspecionadas visualmente, incluindo instruções abertas em 375 px. Não há suíte E2E
 persistente; os testes usaram schema e contas temporários, removidos ao terminar.
+
+## Exclusão de versões não publicadas
+
+Professional da carteira atual pode excluir DRAFT/PENDING_REVIEW no detalhe da versão após confirmação. APPROVED/ARCHIVED retornam 409. A exclusão remove dias e exercícios; se não houver mais versões, remove também o plano pai. A aprovação de um treino antigo com dia vazio `isRest=false` continua bloqueada até revisão manual ou nova geração.

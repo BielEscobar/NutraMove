@@ -8,7 +8,7 @@ Estado: **preparado e validado localmente; não executado na Hostinger**. Não h
    Se a Hostinger/EasyPanel já fornecer TLS e proxy gerenciado, não iniciar o serviço `proxy` deste Compose em paralelo; adaptar o encaminhamento e a lista de IPs confiáveis, depois repetir todos os testes.
 2. Preparar SSH por chave, usuário operacional com permissão Docker, atualizações de segurança e firewall. Validar acesso SSH antes de alterar regras. Permitir 22/tcp (preferencialmente restrito), 80/tcp e 443/tcp. Não publicar 5432, 8000 ou 3000. Conferir `ss -tulpn`, painel Hostinger e `docker compose ps`.
 3. Verificar que `172.30.46.0/24` não conflita com redes Docker/VPS existentes. O Caddy usa `172.30.46.10` na rede `edge`; **somente esse IP** é confiável para Uvicorn. Se for necessário mudar a subnet, alterar em conjunto Compose e `--forwarded-allow-ips`, e repetir o teste de IP/HTTPS. O Caddy padrão ignora `X-Forwarded-For` fornecido pelo cliente e estabelece os headers encaminhados; não configurar `trusted_proxies` de CDN sem faixas oficiais e proteção do origin.
-4. Reservar espaço persistente para `nutramove-prod_postgres_prod_data`, `nutramove-prod_caddy_prod_data` e `nutramove-prod_caddy_prod_config`, além de armazenamento de backup fora do volume do banco e cópia externa criptografada. Validar `df -h` e `docker system df`.
+4. Reservar espaço persistente para `nutramove-prod_postgres_prod_data`, `nutramove-prod_private_uploads_prod`, `nutramove-prod_caddy_prod_data` e `nutramove-prod_caddy_prod_config`, além de armazenamento de backup fora desses volumes e cópia externa criptografada. Validar `df -h` e `docker system df`.
 
 ## Código, variáveis e build
 
@@ -23,7 +23,7 @@ cp infra/.env.prod.example infra/.env.prod
 chmod 600 infra/.env.prod
 ```
 
-Preencher `infra/.env.prod` com domínios reais sem esquema (`APP_DOMAIN`, `API_DOMAIN`), e-mail ACME, `DEPLOY_TAG=<SHA_APROVADO>`, senha PostgreSQL **aleatória e segura para URL** e `RATE_LIMIT_SECRET` aleatório de pelo menos 32 caracteres. Não usar exemplos. O banco e o HMAC usam esses valores no runtime; somente `https://API_DOMAIN` entra no build público do Next. `AI_ENABLED=false` permanece no Compose; chave de IA não é necessária. Não colocar segredos em `NEXT_PUBLIC_*`, imagem, log ou Git. O operador com acesso ao Docker pode inspecionar variáveis de contêiner; limitar acesso ao socket Docker e ao arquivo `.env.prod`. Para produção com gestor de segredos, adaptar a injeção sem alterar o contrato do backend.
+Preencher `infra/.env.prod` com domínios reais sem esquema (`APP_DOMAIN`, `API_DOMAIN`), e-mail ACME, `DEPLOY_TAG=<SHA_APROVADO>`, senha PostgreSQL **aleatória e segura para URL** e `RATE_LIMIT_SECRET` aleatório de pelo menos 32 caracteres. Não usar exemplos. O banco e o HMAC usam esses valores no runtime; somente `https://API_DOMAIN` entra no build público do Next. A IA inicia com `AI_ENABLED=false`; se aprovada para produção, configurar `AI_ENABLED=true`, `AI_API_KEY`, `AI_MODEL` e `AI_TIMEOUT_SECONDS` apenas nesse arquivo ignorado pelo Git. A chave entra somente no backend em runtime, nunca no build ARG, frontend, Caddy, logs ou healthcheck. O operador com acesso ao Docker pode inspecionar variáveis de contêiner; limitar acesso ao socket Docker e ao arquivo `.env.prod`. Para produção com gestor de segredos, adaptar a injeção sem alterar o contrato do backend.
 
 ```bash
 docker compose --env-file infra/.env.prod -f infra/compose.prod.yaml config --quiet
@@ -35,7 +35,7 @@ docker compose --env-file infra/.env.prod -f infra/compose.prod.yaml up -d --wai
 
 ## Backup, migration e startup
 
-Antes de atualizar banco já usado, fazer backup e restore de verificação conforme [backup-restore.md](backup-restore.md). Em banco novo, registrar que não existe estado anterior. **Uma única execução de Alembic** deve ocorrer antes de iniciar a API pública:
+Antes de atualizar banco já usado, fazer backup conjunto de PostgreSQL **e fotos privadas** e verificar restore de ambos conforme [backup-restore.md](backup-restore.md). A rotina para o backend durante a captura; agendá-la em janela de baixa atividade. Em banco novo, registrar que não existe estado anterior. **Uma única execução de Alembic** deve ocorrer antes de iniciar a API pública:
 
 ```bash
 docker compose --env-file infra/.env.prod -f infra/compose.prod.yaml run --rm --no-deps backend python -m alembic heads

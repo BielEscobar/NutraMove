@@ -77,6 +77,16 @@ def test_publication(
     assert client.get(f"/student/informations/{draft['id']}").status_code == 404
 
 
+def test_unicode_content_round_trip(client: TestClient, family: Family) -> None:
+    content = "Nutrição, evolução, hidratação e reavaliação estão disponíveis."
+    login(client, family.a.user)
+    created = client.post(BASE, headers=ORIGIN, json=CONTENT | {"content": content})
+    assert created.status_code == 201
+    result = client.get(f"{BASE}/{created.json()['id']}")
+    assert result.status_code == 200
+    assert result.json()["content"] == content
+
+
 @pytest.mark.parametrize(
     "method,suffix", [("GET", ""), ("PATCH", ""), ("POST", "/publish"), ("POST", "/archive")]
 )

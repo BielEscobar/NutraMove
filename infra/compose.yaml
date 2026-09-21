@@ -1,4 +1,4 @@
-name: nutramove
+﻿name: nutramove
 
 services:
   db:
@@ -28,8 +28,12 @@ services:
       AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
       AI_API_KEY: ${AI_API_KEY:-}
       AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-45}
+      PRIVATE_UPLOAD_DIR: /app/private_uploads
+      MAX_PHOTO_BYTES: ${MAX_PHOTO_BYTES:-8388608}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-nutramove}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}@db:5432/${POSTGRES_DB:-nutramove}
       CORS_ORIGINS: '["http://localhost:3000"]'
+    volumes:
+      - private_uploads:/app/private_uploads
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
@@ -44,3 +48,4 @@ services:
 
 volumes:
   postgres_data:
+  private_uploads:

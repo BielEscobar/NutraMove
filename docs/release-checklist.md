@@ -1,15 +1,17 @@
 # Checklist de release V1
 
-Itens locais confirmados em 15 de setembro de 2026:
+Itens locais confirmados até 20 de setembro de 2026 (os testes visuais abaixo são evidência da homologação anterior):
 
-- [x] Suíte backend completa (404 testes, nenhum skip)
+- [x] Suíte backend completa (471 testes, nenhuma falha ou skip)
 - [x] Ruff check e format, mypy strict e pip check
 - [x] Biome, TypeScript e Next production build
 - [x] Docker backend/frontend e Compose de produção
-- [x] Alembic current/head/check em `20260913_10`
+- [x] Alembic heads/check em `20260920_12`, sem migration nova nesta etapa
 - [x] Caddyfile validado com domínios fictícios
-- [x] Persistência em volume e restore em banco temporário sintético
+- [x] Backup conjunto PostgreSQL/fotos privadas e restore em banco/volume temporários sintéticos, com integridade conferida
+- [x] Compose de produção validado com IA desabilitada e habilitada com chave sintética; chave somente no backend em runtime
 - [x] RBAC/IDOR, fluxos V1, transferência, segurança e IA fake cobertos pela regressão automatizada
+- [x] NutraMove AI homologada localmente com chamada real, sem publicação automática
 - [x] Visual autenticado local em 112 combinações de rota/perfil/largura, inclusive mobile 375 px
 - [x] Console local sem exceção JavaScript; somente abortos esperados da navegação automatizada
 - [x] Segredos e artefatos locais revisados; ajuda acidental do `less` removida
@@ -25,8 +27,8 @@ Itens que exigem a release/ambiente público e continuam pendentes:
 - [ ] DNS real de app/API
 - [ ] TLS válido, redirect HTTP→HTTPS e renovação
 - [ ] IP real do cliente confirmado através do proxy confiável
-- [ ] Backup diário e cópia externa criptografada configurados
-- [ ] Restore testado a partir da cópia externa
+- [ ] Backup diário de PostgreSQL e fotos, com cópia externa criptografada, configurado na VPS
+- [ ] Restore dos dois recursos testado a partir da cópia externa
 - [ ] Smoke MASTER em HTTPS
 - [ ] Smoke Professional em HTTPS
 - [ ] Smoke Student em HTTPS

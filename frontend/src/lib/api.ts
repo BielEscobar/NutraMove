@@ -29,7 +29,10 @@ export async function apiRequest<T>(
       ...options,
       credentials: "include",
       cache: "no-store",
-      headers: { "Content-Type": "application/json", ...options.headers },
+      headers:
+        options.body instanceof FormData
+          ? options.headers
+          : { "Content-Type": "application/json", ...options.headers },
     });
   } catch {
     throw new ApiError(0, "Não foi possível conectar à API. Tente novamente.");

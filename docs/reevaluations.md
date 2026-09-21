@@ -137,3 +137,11 @@ não há polling. Timestamps permitem futura integração explícita com notific
 mas nenhuma etapa do Dia 10 foi iniciada. Testes E2E ainda não formam uma suíte persistente.
 
 Veja [validation.md](validation.md) e [dia9-relatorio.md](dia9-relatorio.md).
+
+## Anamnese v2 e snapshots
+
+A criação oficial pela interface exige um snapshot atual e novas fotos FRONT/SIDE. O snapshot JSONB é validado e imutável: conserva peso, objetivo, atividade, disponibilidade, percepção de evolução, dificuldades, observações e campos opcionais que mudaram. Ele não sobrescreve a anamnese inicial. O lifecycle PENDING → IN_REVIEW → COMPLETED e cancelamentos existentes permanece igual.
+
+A NutraMove AI usa o snapshot mais recente com status COMPLETED quando existe; caso contrário usa o estado atual da anamnese. Fotos e referências de storage nunca entram no contexto.
+
+Na homologação final, a interface passou a oferecer seis etapas: evolução/objetivo, rotina/treino, alimentação, saúde/limitações, fotos e revisão. Ela preenche os campos com a última reavaliação concluída, quando disponível, ou com o cadastro atual. O Student pode confirmar ou alterar os dados sem redigitar tudo; voltar de etapa preserva o rascunho. O snapshot enviado conserva os valores daquele momento, inclusive campos que foram limpos. Solicitações PENDING ou IN_REVIEW não alteram o contexto da IA.

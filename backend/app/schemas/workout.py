@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Annotated, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
 from app.models.workout import WorkoutSource, WorkoutStatus
 
@@ -29,7 +29,19 @@ class ExerciseInput(InputModel):
 class DayInput(InputModel):
     name: Name
     description: str | None = Field(default=None, max_length=2000)
+    is_rest: bool = Field(
+        default=False,
+        strict=True,
+        validation_alias=AliasChoices("isRest", "is_rest"),
+        serialization_alias="isRest",
+    )
     exercises: list[ExerciseInput] = Field(default_factory=list, max_length=100)
+
+    @model_validator(mode="after")
+    def rest_has_no_exercises(self) -> Self:
+        if self.is_rest and self.exercises:
+            raise ValueError("A rest day cannot contain exercises.")
+        return self
 
 
 class VersionContent(InputModel):

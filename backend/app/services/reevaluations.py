@@ -20,7 +20,9 @@ Action = Literal["start-review", "complete", "cancel"]
 OPEN_CONFLICT = "Você já possui uma solicitação de reavaliação em andamento."
 
 
-def create(db: Session, actor: User, data: ReevaluationCreate) -> ReevaluationRequest:
+def create(
+    db: Session, actor: User, data: ReevaluationCreate, *, commit: bool = True
+) -> ReevaluationRequest:
     owner = get(db, actor, lock=True)
     if not owner.user.is_active:
         raise HTTPException(401, "Sessão inválida ou expirada.")
@@ -40,13 +42,15 @@ def create(db: Session, actor: User, data: ReevaluationCreate) -> ReevaluationRe
         student_id=owner.id,
         professional_id=owner.professional.id,
         status=Status.PENDING,
-        **data.model_dump(),
+        **data.model_dump(exclude={"snapshot"}),
+        snapshot=data.snapshot.model_dump(mode="json") if data.snapshot else None,
     )
     try:
         db.add(record)
         db.flush()
         notify(db, owner.professional.user_id, NotificationType.REEVALUATION_CREATED, record.id)
-        db.commit()
+        if commit:
+            db.commit()
     except IntegrityError:
         db.rollback()
         raise HTTPException(409, OPEN_CONFLICT) from None

@@ -16,6 +16,7 @@ import {
 } from "@/lib/evolution";
 import { useApiResource } from "@/lib/use-api-resource";
 import { EvolutionChart } from "./evolution-chart";
+import { PhotoEvolution } from "./photo-evolution";
 
 export function EvolutionPage({
   area,
@@ -159,6 +160,7 @@ export function EvolutionPage({
           />
         )}
       </section>
+      <PhotoEvolution area={area} studentId={studentId} />
       <section>
         <h2 className="mb-4 text-xl font-semibold">
           Avaliações — histórico completo

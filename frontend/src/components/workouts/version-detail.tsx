@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -20,8 +21,34 @@ export function VersionDetail({ area, id }: { area: WorkoutArea; id: string }) {
     [actionError, setActionError] = useState(""),
     [success, setSuccess] = useState("");
   const guard = useRef(false),
-    dialog = useRef<HTMLDialogElement>(null);
+    dialog = useRef<HTMLDialogElement>(null),
+    deleteDialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
+  async function deleteDraft() {
+    if (guard.current || !data) return;
+    guard.current = true;
+    setBusy(true);
+    setActionError("");
+    try {
+      const workout = await apiRequest<{ student_id: string }>(
+        `/professional/workouts/${data.workout_id}`,
+      );
+      await apiRequest(path, { method: "DELETE" });
+      deleteDialog.current?.close();
+      router.push(`/professional/students/${workout.student_id}`);
+      router.refresh();
+    } catch (cause) {
+      if (cause instanceof ApiError && cause.status === 401)
+        router.replace("/login");
+      else
+        setActionError(
+          cause instanceof Error ? cause.message : "Não foi possível excluir.",
+        );
+    } finally {
+      guard.current = false;
+      setBusy(false);
+    }
+  }
   async function act(action: "approve" | "duplicate") {
     if (guard.current || !data) return;
     guard.current = true;
@@ -52,7 +79,7 @@ export function VersionDetail({ area, id }: { area: WorkoutArea; id: string }) {
           cause instanceof ApiError && cause.status === 409
             ? "A versão ou a situação do aluno mudou. Atualize a página antes de publicar."
             : cause instanceof ApiError && cause.status === 422
-              ? "Inclua ao menos uma divisão e um exercício por divisão antes de publicar."
+              ? "Adicione ao menos um dia de treino ativo com exercícios antes de publicar."
               : cause instanceof Error
                 ? cause.message
                 : "Não foi possível concluir.",
@@ -95,6 +122,18 @@ export function VersionDetail({ area, id }: { area: WorkoutArea; id: string }) {
                 >
                   Editar rascunho
                 </Link>
+                <button
+                  type="button"
+                  disabled={busy}
+                  className="master-secondary text-destructive"
+                  onClick={() => deleteDialog.current?.showModal()}
+                >
+                  <Trash2
+                    aria-hidden="true"
+                    className="mr-2 inline-block size-4"
+                  />
+                  Excluir rascunho
+                </button>
                 <button
                   type="button"
                   disabled={busy}
@@ -167,6 +206,45 @@ export function VersionDetail({ area, id }: { area: WorkoutArea; id: string }) {
             onClick={() => void act("approve")}
           >
             {busy ? "Publicando…" : "Confirmar publicação"}
+          </button>
+        </div>
+      </dialog>
+      <dialog
+        ref={deleteDialog}
+        aria-labelledby="delete-workout-title"
+        className="m-auto w-[calc(100%_-_2rem)] max-w-md rounded-lg border bg-white p-6 shadow-lg backdrop:bg-black/35"
+        onCancel={(event) => {
+          if (busy) event.preventDefault();
+        }}
+      >
+        <h2 id="delete-workout-title" className="text-xl font-semibold">
+          Excluir este rascunho?
+        </h2>
+        <p className="mt-4 text-sm">
+          Esta ação removerá permanentemente esta versão ainda não publicada e
+          não poderá ser desfeita.
+        </p>
+        {actionError && (
+          <p role="alert" className="mt-4 text-destructive">
+            {actionError}
+          </p>
+        )}
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            disabled={busy}
+            className="master-secondary"
+            onClick={() => deleteDialog.current?.close()}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            className="master-primary"
+            onClick={() => void deleteDraft()}
+          >
+            {busy ? "Excluindo…" : "Excluir rascunho"}
           </button>
         </div>
       </dialog>

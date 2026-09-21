@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useRef, useState } from "react";
+import { AIPlansGenerator } from "@/components/ai/ai-plans-generator";
 import { ErrorState, LoadingState } from "@/components/master/resource-state";
 import { StudentTransferPanel } from "@/components/transfers/student-transfer-panel";
 import { ApiError, apiRequest } from "@/lib/api";
@@ -222,6 +223,9 @@ export function StudentDetail({ area, id }: { area: StudentArea; id: string }) {
               Profissional:{" "}
               {data.professional_name || "Sem profissional atribuído"}
             </p>
+            {area === "professional" && data.status === "ACTIVE" && (
+              <AIPlansGenerator studentId={data.id} />
+            )}
             {area === "master" && (
               <StudentTransferPanel
                 student={data}

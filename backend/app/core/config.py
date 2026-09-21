@@ -33,6 +33,8 @@ class Settings(BaseSettings):
         default_factory=lambda: SecretStr(secrets.token_urlsafe(32))
     )
     docs_enabled: bool | None = None
+    private_upload_dir: Path = BACKEND_DIR / "private_uploads"
+    max_photo_bytes: int = Field(default=8 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024)
 
     @field_validator("business_timezone")
     @classmethod

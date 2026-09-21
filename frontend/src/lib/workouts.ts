@@ -20,6 +20,7 @@ export type WorkoutExercise = {
 export type WorkoutDay = {
   name: string;
   description: string | null;
+  isRest: boolean;
   exercises: WorkoutExercise[];
 };
 export type WorkoutContent = {

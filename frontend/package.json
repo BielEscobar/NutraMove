@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "biome check . --error-on-warnings",
     "typecheck": "next typegen && tsc --noEmit",
+    "test:routes": "node --test scripts/check-professional-routes.mjs",
+    "test:workout-draft": "node --experimental-strip-types --test scripts/check-workout-draft.mjs",
     "format": "biome format --write ."
   },
   "dependencies": {

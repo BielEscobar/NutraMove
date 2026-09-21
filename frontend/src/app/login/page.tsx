@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowRight, Leaf, LoaderCircle, LockKeyhole } from "lucide-react";
+import { ArrowRight, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
+import { NutraMoveLogo } from "@/components/nutramove-logo";
 import { ApiError, apiRequest, type User } from "@/lib/api";
 import { homeForRole } from "@/lib/students";
 
@@ -58,10 +59,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen flex-col bg-background lg:flex-row">
       <section className="flex flex-col justify-between bg-brand-deep px-8 py-10 text-white lg:w-5/12 lg:px-14 lg:py-14">
-        <div className="flex items-center gap-3 text-xl font-semibold tracking-tight">
-          <Leaf className="size-7 text-brand-mint" aria-hidden="true" />
-          NUTRAMOVE
-        </div>
+        <NutraMoveLogo className="h-auto w-44" priority />
         <div className="my-12 max-w-sm lg:my-auto">
           <p className="mb-4 text-sm font-medium text-brand-mint">
             Cuidado em movimento
@@ -79,9 +77,7 @@ export default function LoginPage() {
       </section>
       <section className="flex flex-1 items-center justify-center px-6 py-14">
         <div className="w-full max-w-sm">
-          <div className="mb-7 flex size-11 items-center justify-center rounded-lg border border-border bg-white">
-            <LockKeyhole className="size-5 text-primary" aria-hidden="true" />
-          </div>
+          <NutraMoveLogo className="mb-7 h-auto w-32" priority />
           <h2 className="text-2xl font-semibold tracking-tight">
             Bem-vindo de volta
           </h2>

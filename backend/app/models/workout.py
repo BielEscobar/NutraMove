@@ -121,6 +121,7 @@ class WorkoutDay(Base):
     )
     name: Mapped[str] = mapped_column(String(160))
     description: Mapped[str | None] = mapped_column(String(2000))
+    is_rest: Mapped[bool] = mapped_column(default=False, server_default="false")
     position: Mapped[int]
     exercises: Mapped[list[WorkoutExercise]] = relationship(
         cascade="all, delete-orphan", order_by="WorkoutExercise.position"

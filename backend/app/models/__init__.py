@@ -6,6 +6,7 @@ from app.models.hydration import WaterRecord
 from app.models.information import Information
 from app.models.notification import Notification
 from app.models.professional import Professional
+from app.models.progress_photo import ProgressPhoto, ProgressPhotoSet
 from app.models.rate_limit import RateLimitWindow
 from app.models.reevaluation import ReevaluationRequest
 from app.models.student import Student, StudentStatus
@@ -34,6 +35,8 @@ __all__ = [
     "StudentStatus",
     "AuthSession",
     "Professional",
+    "ProgressPhoto",
+    "ProgressPhotoSet",
     "User",
     "UserRole",
 ]

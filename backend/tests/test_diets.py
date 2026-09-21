@@ -132,6 +132,92 @@ def draft(client: TestClient, family: Family, content: dict[str, object]) -> dic
     return data
 
 
+def test_delete_draft_removes_tree_and_empty_parent(
+    client: TestClient, family: Family, draft: dict[str, object], db: Session
+) -> None:
+    version_id = UUID(str(draft["id"]))
+    diet_id = UUID(str(draft["diet_id"]))
+    version = db.get(DietVersion, version_id)
+    assert version is not None
+    food_id = version.meals[0].foods[0].id
+    assert (
+        client.delete(f"/professional/diet-versions/{version_id}", headers=ORIGIN).status_code
+        == 204
+    )
+    db.expire_all()
+    assert db.get(DietVersion, version_id) is None
+    assert db.get(Food, food_id) is None
+    assert db.get(Diet, diet_id) is None
+
+
+def test_delete_diet_authorization_and_published_history(
+    client: TestClient, family: Family, draft: dict[str, object]
+) -> None:
+    path = f"/professional/diet-versions/{draft['id']}"
+    assert client.delete(path).status_code == 403
+    login(client, family.b.user)
+    assert client.delete(path, headers=ORIGIN).status_code == 404
+    login(client, family.master)
+    assert client.delete(path, headers=ORIGIN).status_code == 403
+    login(client, family.student_a.user)
+    assert client.delete(path, headers=ORIGIN).status_code == 403
+    client.cookies.clear()
+    assert client.delete(path, headers=ORIGIN).status_code == 401
+    login(client, family.a.user)
+    approved = client.post(path + "/approve", headers=ORIGIN, json={"expected_revision": 1})
+    assert approved.status_code == 200, approved.text
+    assert client.delete(path, headers=ORIGIN).status_code == 409
+    assert client.get(path).json()["status"] == "APPROVED"
+
+
+def test_delete_one_unpublished_version_preserves_other_version_and_parent(
+    client: TestClient, draft: dict[str, object], db: Session, content: dict[str, object]
+) -> None:
+    created = client.post(
+        f"/professional/diets/{draft['diet_id']}/versions", headers=ORIGIN, json=content
+    )
+    assert created.status_code == 201, created.text
+    assert (
+        client.delete(
+            f"/professional/diet-versions/{created.json()['id']}", headers=ORIGIN
+        ).status_code
+        == 204
+    )
+    db.expire_all()
+    assert db.get(Diet, UUID(str(draft["diet_id"]))) is not None
+    assert client.get(f"/professional/diet-versions/{draft['id']}").status_code == 200
+
+
+@pytest.mark.parametrize(
+    "status,expected", [(DietStatus.PENDING_REVIEW, 204), (DietStatus.ARCHIVED, 409)]
+)
+def test_delete_diet_status_policy(
+    client: TestClient,
+    draft: dict[str, object],
+    db: Session,
+    status: DietStatus,
+    expected: int,
+) -> None:
+    version = db.get(DietVersion, UUID(str(draft["id"])))
+    assert version is not None
+    version.status = status
+    db.commit()
+    response = client.delete(f"/professional/diet-versions/{draft['id']}", headers=ORIGIN)
+    assert response.status_code == expected
+
+
+def test_delete_diet_after_transfer_rejects_former_and_new_owner(
+    client: TestClient, family: Family, draft: dict[str, object], db: Session
+) -> None:
+    family.student_a.professional_id = family.b.id
+    db.commit()
+    path = f"/professional/diet-versions/{draft['id']}"
+    assert client.delete(path, headers=ORIGIN).status_code == 404
+    login(client, family.b.user)
+    assert client.delete(path, headers=ORIGIN).status_code == 404
+    assert db.get(DietVersion, UUID(str(draft["id"]))) is not None
+
+
 def test_creation_and_tree(
     client: TestClient, family: Family, draft: dict[str, object], db: Session
 ) -> None:

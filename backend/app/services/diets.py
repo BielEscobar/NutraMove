@@ -113,6 +113,27 @@ def duplicate(db: Session, actor: User, version_id: UUID) -> DietVersion:
     return version
 
 
+def delete_unpublished(db: Session, actor: User, version_id: UUID) -> None:
+    version = diets.get_version(db, actor, version_id, lock=True)
+    if version.status not in {DietStatus.DRAFT, DietStatus.PENDING_REVIEW}:
+        raise HTTPException(409, "Versões publicadas ou arquivadas não podem ser excluídas.")
+    diet_id = version.diet_id
+    db.delete(version)
+    try:
+        db.flush()
+        remaining = db.scalar(select(DietVersion.id).where(DietVersion.diet_id == diet_id).limit(1))
+        if remaining is None:
+            parent = db.get(Diet, diet_id)
+            if parent is not None:
+                db.delete(parent)
+        commit(db)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            409, "Conflito ao excluir a dieta. Atualize e tente novamente."
+        ) from None
+
+
 def check_editable(version: DietVersion, expected_revision: int) -> None:
     if version.status not in {DietStatus.DRAFT, DietStatus.PENDING_REVIEW}:
         raise HTTPException(409, "Versão publicada ou arquivada: crie uma nova versão.")

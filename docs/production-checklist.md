@@ -10,7 +10,7 @@ Este checklist é uma lista de decisões e verificações para futura implantaç
 - [ ] Configurar reverse proxy (Nginx/Caddy/Cloudflare se adotado), TLS válido, renovação de certificado, redirecionamento HTTP→HTTPS, HSTS na borda após teste e limites de tamanho/tempo de requisição compatíveis com IA.
 - [ ] Definir exatamente os IPs de proxy confiáveis no Uvicorn/ASGI; bloquear acesso direto ao backend; confirmar que `request.client.host` é o cliente real para rate limiting sem aceitar `X-Forwarded-For` arbitrário.
 - [ ] Validar headers de segurança do frontend, API e proxy; ajustar CSP completa somente após teste do Next.js em produção.
-- [ ] Criar backup PostgreSQL automatizado, criptografado e fora do host principal, com retenção, acesso mínimo, restauração testada e monitoramento de falha. Proteger também volumes e segredos.
+- [ ] Agendar o backup conjunto PostgreSQL + `private_uploads_prod`, copiar ambos criptografados para fora da VPS, monitorar falhas e testar restore dos dois a partir da cópia externa. Definir retenção, acesso mínimo e proteção de segredos.
 - [ ] Fazer migration `alembic upgrade head` em janela planejada antes de ativar backend; confirmar `current` e `check`, com backup e plano de rollback. Não editar migrations históricas.
 - [ ] Preparar deploy e rollback de frontend/backend por versão, healthcheck/liveness, logs sem payloads sensíveis, restart policy e alertas essenciais (5xx, 429 anormal, banco, disco, backup).
 - [ ] Definir limpeza operacional de `rate_limit_windows` inativos se não houver tráfego e política de retenção/encerramento para dados de saúde, histórico, AuditLog e backups.

@@ -90,6 +90,11 @@ def edit(
     return VersionResponse.model_validate(service.edit(db, actor, version_id, data))
 
 
+@professional_router.delete("/workout-versions/{version_id}", status_code=204)
+def delete_version(version_id: UUID, db: DbSession, actor: CurrentUser) -> None:
+    service.delete_unpublished(db, actor, version_id)
+
+
 @professional_router.post(
     "/workout-versions/{version_id}/duplicate", status_code=201, response_model=VersionResponse
 )
